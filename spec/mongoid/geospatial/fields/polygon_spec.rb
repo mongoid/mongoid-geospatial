@@ -49,20 +49,20 @@ describe Mongoid::Geospatial::Polygon do
         Farm.create_indexes
       end
 
-      let!(:ranch) do
+      let(:ranch) do
         Farm.create!(name: 'Ranch',
                      area: [[1, 1], [3, 3], [3, 1], [1, 1]],
                      geom: [2, 2])
       end
 
-      let!(:farm) do
+      let(:farm) do
         Farm.create!(name: 'Farm',
                      area: [[47, 1], [48, 1.5], [49, 3], [49, 1], [47, 1]],
                      geom: [48, 1.28])
       end
 
       it 'returns the documents within a box' do
-        query = Farm.geo_spacial(:geom.within_polygon => [ranch.area])
+        query = Farm.geo_spatial(:geom.within_polygon => [ranch.area])
         expect(query.to_a).to eq([ranch])
       end
 

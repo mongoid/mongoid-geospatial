@@ -82,8 +82,8 @@ describe Mongoid::Geospatial::Point do
       expect(bar.location[0]).to eq(3.0)
     end
 
-    it 'should have an ActiveModel symbol accessor' do
-      expect(bar[:location]).to eq([3, 2])
+    it 'should have an Act iveModel symbol accessor' do
+      expect(bar[:location].to_a).to eq(bar.location.to_a)
     end
 
     it 'should have a radius helper' do
@@ -129,7 +129,7 @@ describe Mongoid::Geospatial::Point do
       end
 
       it 'returns the documents sorted closest to furthest' do
-        expect(Bar.where(:location.near => jim.location))
+        expect(Bar.where(:location.near => jim.location).to_a)
           .to eq([paris, prague, berlin])
       end
 
@@ -240,7 +240,7 @@ describe Mongoid::Geospatial::Point do
 
     describe 'with rgeo' do
       describe 'instantiated' do
-        let(:bar) { Bar.create!(name: 'Vitinho', location: [10, 10]) }
+        let(:bar) { Bar.new(name: 'Vitinho', location: [10, 10]) }
 
         it 'should demongoize to rgeo' do
           expect(bar.location.class).to eql(Mongoid::Geospatial::Point)

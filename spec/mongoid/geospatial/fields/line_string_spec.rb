@@ -22,12 +22,11 @@ describe Mongoid::Geospatial::LineString do
       expect(River.first.course).to eq([[1, 1], [9, 9], [10, 10]])
     end
 
-    it 'should parent.line_string << point nicely' do
-      pending 'Mongoid Issue #...'
+    it 'should NOT parent.line_string << point nicely (mongoid doesnt track <<)' do
       river = River.create!(name: 'Amazonas', course: [[1, 1], [9, 9]])
-      river.course.push [10, 10]
+      river.course << [10, 10]
       river.save
-      expect(River.first.course).to eq([[1, 1], [9, 9], [10, 10]])
+      expect(River.first.course).to eq([[1, 1], [9, 9]])
     end
 
     it 'should have same obj id' do

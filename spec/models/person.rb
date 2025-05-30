@@ -60,13 +60,6 @@ class Person
   scope :minor, -> { where(:age.lt => 18) }
   scope :without_ssn, -> { without(:ssn) }
 
-  def score_with_rescoring=(score)
-    @rescored = score.to_i + 20
-    self.score_without_rescoring = score
-  end
-
-  alias_method_chain :score=, :rescoring
-
   def update_addresses
     addresses.each do |address|
       address.street = 'Updated Address'

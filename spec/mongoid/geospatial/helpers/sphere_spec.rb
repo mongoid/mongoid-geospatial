@@ -12,10 +12,11 @@ describe Mongoid::Fields do
 
     it 'should create correct indexes' do
       expect(Alarm.collection.indexes.get(spot: '2dsphere'))
-        .to include('key' => { 'spot' => '2dsphere' },
+        .to include('2dsphereIndexVersion' => 3,
+                    'background' => false,
+                    'key' => { 'spot' => '2dsphere' },
                     'name' => 'spot_2dsphere',
-                    'ns' => 'mongoid_geo_test.alarms',
-                    'v' => 1)
+                    'v' => 2)
     end
 
     it 'should set spatial fields' do
