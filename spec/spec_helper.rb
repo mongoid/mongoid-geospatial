@@ -16,6 +16,13 @@ require 'mongoid/geospatial'
 
 Mongoid.load!(File.expand_path('../mongoid.yml', __FILE__), :test)
 
+if ENV['DEBUG'] == 'true'
+  Mongo::Logger.logger.level = Logger::DEBUG
+else
+  Mongo::Logger.logger.level = Logger::INFO
+end
+# Mongo::Logger.logger.level = Logger::DEBUG
+
 # Autoload every model for the test suite that sits in spec/app/models.
 Dir[File.join(MODELS, '*.rb')].sort.each do |file|
   name = File.basename(file, '.rb')
@@ -31,5 +38,4 @@ RSpec.configure do |config|
   end
 end
 
-Mongo::Logger.logger.level = Logger::INFO if Mongoid::VERSION >= '5'
 puts "Running with Mongoid v#{Mongoid::VERSION}"

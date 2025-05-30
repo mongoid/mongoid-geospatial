@@ -11,6 +11,6 @@ Mongoid::Fields.option :sphere do |model, field, _options|
     spatial_fields_indexed << field.name.to_sym
 
     # Create 2Dsphere index
-    sphere_index field.name
+    spherical_index field.name
   end
 end

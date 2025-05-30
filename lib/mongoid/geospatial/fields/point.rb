@@ -85,6 +85,18 @@ module Mongoid
       end
 
       #
+      # Point definition as GeoJSON
+      #
+      # "x, y"
+      #
+      # @return [String] Point as comma separated String
+      #
+      def to_geo_json
+        # Return a GeoJSON point hash that MongoDB can use
+        { type: "Point", coordinates: [x, y] }
+      end
+
+      #
       # Point inverse/reverse
       #
       # MongoDB: "x, y"

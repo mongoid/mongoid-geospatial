@@ -32,49 +32,85 @@ describe Mongoid::Geospatial do
     after do
       Bar.collection.indexes.drop_all
     end
-    let!(:jfk) do
-      Bar.create!(name: 'jfk', location: [-73.77694444, 40.63861111])
+
+    let!(:moes) do
+      Bar.create!(name: "Moe's", location: [-73.77694444, 40.63861111])
     end
 
-    let!(:lax) do
-      Bar.create!(name: 'lax', location: [-118.40, 33.94])
+    let!(:rose) do
+      Bar.create!(name: 'Rosa', location: [-118.40, 33.94])
     end
 
-    it 'should work specifing center and different location lax' do
-      expect(Bar.nearby(lax.location)).to eq([lax, jfk])
+    let!(:jane) do
+      Bar.create!(name: "Jane's", location: [1, 1])
     end
 
-    it 'should work specifing center and different location jfk' do
-      expect(Bar.nearby(jfk.location)).to eq([jfk, lax])
+    let!(:foo) do
+      Bar.create!(name: "Foo", location: [3, 3])
+    end
+
+    it 'should work specifing center and different location foo' do
+      expect(Bar.nearby(foo.location)).to be_a Mongoid::Criteria
+      expect(Bar.nearby(foo.location).selector).to eq({"location" => {"$near" => [3.0, 3.0]}})
+    end
+
+    it 'should work specifing center and different location moes' do
+      expect(Bar.nearby(moes.location).limit(2)).to eq([moes, rose])
     end
 
     it 'should work finding first' do
-      expect(Bar.nearby(jfk.location).first).to eq(jfk)
+      expect(Bar.nearby(moes.location).first).to eq(moes)
     end
 
     it 'really should work find first nearby' do
-      aa = Bar.create!(name: 'aa', location: [1, 1])
-      bb = Bar.create!(name: 'bb', location: [2, 2])
-      cc = Bar.create!(name: 'cc', location: [3, 3])
-      expect(Bar.count).to eq(5)
-      expect(Bar.nearby([1, 1]).to_a).to eq([aa, bb, cc, jfk, lax])
-      expect(Bar.nearby([2, 2]).to_a.first).to eq(bb)
+      expect(Bar.count).to eq(4)
+      expect(Bar.nearby([1, 1]).to_a).to eq([jane, foo, moes, rose])
+      expect(Bar.nearby([2, 2]).to_a.first).to eq(jane)
       # THIS WILL FAIL MONGOID ISSUE
-      # expect(Bar.nearby(lax.location).first).to eq(lax)
+      # expect(Bar.nearby(rose.location).first).to eq(rose)
     end
 
     it 'should work specifing first' do
-      bars = Bar.nearby(lax.location).to_a
-      expect(bars.first).to eq(lax)
+      bars = Bar.nearby(rose.location).to_a
+      expect(bars.first).to eq(rose)
     end
 
     it 'should work specifing first' do
-      expect(Bar.nearby(lax.location).to_a.first).to eq(lax)
+      expect(Bar.nearby(rose.location).to_a.first).to eq(rose)
     end
 
     it 'should work specifing first' do
-      expect(Bar.nearby(lax.location).first).to eq(lax)
+      expect(Bar.nearby(rose.location).to_a.first).to eq(rose)
     end
+
+    it 'should work specifing first' do
+      expect(Bar.nearby(rose.location).first).to eq(rose)
+    end
+
+    it 'returns the documents sorted closest to furthest' do
+      expect(Bar.closest_to_location(rose.location).to_a)
+        .to eq([rose, moes, jane, foo])
+    end
+
+    it 'returns the documents sorted closest to furthest' do
+      expect(Bar.closest_to_location(rose.location).limit(2))
+        .to eq([rose, moes])
+    end
+
+    it 'returns the documents sorted closest to furthest' do
+      expect(Bar.closest_to_location(rose.location).first).to eq(rose)
+    end
+
+    it 'returns the documents sorted closest to furthest' do
+      expect(Bar.closest_to_location(rose.location).to_a)
+        .to eq([rose, moes, jane, foo])
+    end
+
+    it 'should work specifing center and different location foo' do
+      expect(Bar.closest_to_location(foo.location)).to be_a Mongoid::Criteria
+      expect(Bar.closest_to_location(foo.location).selector).to eq({"location" => {"$near" => [3.0, 3.0]}})
+    end
+
   end
 
   context '#nearby 2dsphere' do

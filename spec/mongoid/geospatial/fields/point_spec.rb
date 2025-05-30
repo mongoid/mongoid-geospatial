@@ -35,6 +35,28 @@ describe Mongoid::Geospatial::Point do
     end
   end
 
+  it "should have a to_s method" do
+    bar = Bar.create!(name: "Moe's", location: [1, 2])
+    expect(bar.location.to_s).to eq('1.0, 2.0')
+  end
+
+  it "should have a to_s method" do
+    bar = Bar.create!(name: "Moe's", location: [1.0009, 21.009])
+    expect(bar.location.to_s).to eq('1.0009, 21.009')
+  end
+
+  it "should have a to_geo_json method" do
+    bar = Bar.create!(name: "Moe's", location: [1.0009, 21.009])
+    expect(bar.location.to_geo_json).to eq({
+      type: "Point", coordinates: [1.0009, 21.009]
+    })
+  end
+
+  it "should have a to_json method" do
+    bar = Bar.create!(name: "Moe's", location: [1.0009, 21.009])
+    expect(bar.location.to_json).to eq("[1.0009,21.009]")
+  end
+
   it 'should have #reverse to get lat, lon' do
     bar = Bar.create!(name: "Moe's", location: [1, 2])
     expect(bar.location.reverse).to eq([2, 1])
@@ -126,6 +148,11 @@ describe Mongoid::Geospatial::Point do
 
       let!(:jim) do
         Person.new(location: [41.23, 2.9])
+      end
+
+      it 'returns the documents sorted closest to furthest' do
+        expect(Bar.closest_to_location(jim.location).to_a)
+          .to eq([paris, prague, berlin])
       end
 
       it 'returns the documents sorted closest to furthest' do
