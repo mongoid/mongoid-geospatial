@@ -1,5 +1,4 @@
-Mongoid Geospatial
-==================
+# Mongoid Geospatial
 
 A Mongoid Extension that simplifies the use of MongoDB spatial features.
 
@@ -8,8 +7,7 @@ A Mongoid Extension that simplifies the use of MongoDB spatial features.
 [![Coverage Status](https://coveralls.io/repos/github/mongoid/mongoid-geospatial/badge.svg?branch=master)](https://coveralls.io/github/mongoid/mongoid-geospatial?branch=master)
 [![Build Status](https://travis-ci.org/mongoid/mongoid-geospatial.svg?branch=master)](https://travis-ci.org/mongoid/mongoid-geospatial)
 
-Quick Start
------------
+## Quick Start
 
 This gem focuses on (making helpers for) MongoDB's spatial features using Mongoid 5, 6 and 7.
 
@@ -60,17 +58,16 @@ Or programatically:
 Place.create_indexes
 ```
 
-Points
-------
+## Points
 
 This gem defines a specific `Point` class under the Mongoid::Geospatial namespace. Make sure to use `type: ::Mongoid::Geospatial::Point` to avoid name errors or collisions with other `Point` classes you might already have defined `NameError`s.
 
 Currently, MongoDB supports query operations on 2D points only, so that's what this lib does. All geometries apart from points are just arrays in the database. Here's is how you can input a point as:
 
-* longitude latitude array in that order - [long,lat] ([x, y])
-* an unordered hash with latitude key(:lat, :latitude) and a longitude key(:lon, :long, :lng, :longitude)
-* an ordered hash with longitude as the first item and latitude as the second item; this hash does not have include the latitude and longitude keys
-* anything with the a method #to_xy or #to_lng_lat that converts itself to  [long, lat] array
+- longitude latitude array in that order - [long,lat] ([x, y])
+- an unordered hash with latitude key(:lat, :latitude) and a longitude key(:lon, :long, :lng, :longitude)
+- an ordered hash with longitude as the first item and latitude as the second item; this hash does not have include the latitude and longitude keys
+- anything with the a method #to_xy or #to_lng_lat that converts itself to [long, lat] array
 
 _Note: the convention of having longitude as the first coordinate may vary for other libraries. For instance, Google Maps often refer to "LatLng". Make sure you keep those differences in mind. See below for how to configure this library for LatLng._
 
@@ -131,8 +128,7 @@ house.area.bbox    # Returns polygon bounding_box (envelope)
 house.area.center  # Returns calculate middle point
 ```
 
-Model Setup
------------
+## Model Setup
 
 You can create Point, Line, Circle, Box and Polygon on your models:
 
@@ -157,8 +153,7 @@ class CrazyGeom
 end
 ```
 
-Helpers
--------
+## Helpers
 
 You can use `spatial: true` to add a '2d' index automatically,
 No need for `spatial_index :location`:
@@ -181,8 +176,7 @@ field :location,  type: Point, delegate: true
 
 Now instead of `instance.location.x` you may call `instance.x`.
 
-Nearby
-------
+## Nearby
 
 You can add a `spatial_scope` on your models. So you can query:
 
@@ -202,8 +196,7 @@ Good when you're drunk. Just add to your model:
 spatial_scope :<field>
 ```
 
-Geometry
---------
+## Geometry
 
 You can also store Circle, Box, Line (LineString) and Polygons.
 Some helper methods are available to them:
@@ -224,8 +217,7 @@ polygon.radius(5)        # [[1.0, 1.0], 5]
 polygon.radius_sphere(5) # [[1.0, 1.0], 0.00048..]
 ```
 
-Query
------
+## Query
 
 Before you proceed, make sure you have read this:
 
@@ -237,21 +229,21 @@ http://www.rubydoc.info/github/mongoid/origin/Origin/Selectable
 
 You can use Geometry instance directly on any query:
 
-* near
+- near
 
 ```ruby
 Bar.near(location: person.house)
 Bar.where(:location.near => person.house)
 ```
 
-* near_sphere
+- near_sphere
 
 ```ruby
 Bar.near_sphere(location: person.house)
 Bar.where(:location.near_sphere => person.house)
 ```
 
-* within_polygon
+- within_polygon
 
 ```ruby
 Bar.within_polygon(location: [[[x,y],...[x,y]]])
@@ -259,13 +251,11 @@ Bar.within_polygon(location: [[[x,y],...[x,y]]])
 Bar.within_polygon(location: street.bbox)
 ```
 
-* intersects_line
-* intersects_point
-* intersects_polygon
+- intersects_line
+- intersects_point
+- intersects_polygon
 
-
-External Libraries
-------------------
+## External Libraries
 
 We currently support GeoRuby and RGeo.
 If you require one of those, a #to_geo and #to_rgeo, respectivelly,
@@ -338,8 +328,7 @@ end
 
 You will need to manually migrate any existing `Point` data if you change configuration in an existing system.
 
-This Fork
----------
+## This Fork
 
 This fork is not backwards compatible with 'mongoid_spacial'.
 This fork delegates calculations to external libs.
@@ -370,8 +359,7 @@ field :source,  type: Point,    spatial: true # or sphere: true
 
 Beware the 't' and 'c' issue. It's spaTial.
 
-Troubleshooting
----------------
+## Troubleshooting
 
 **Mongo::OperationFailure: can't find special index: 2d**
 
@@ -387,15 +375,12 @@ Programatically
 Model.create_indexes
 ```
 
-Contributing
-------------
+## Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md).
 
-License
--------
+## License
 
 Copyright (c) 2009-2017 Mongoid Geospatial Authors
 
 MIT License, see [MIT-LICENSE](MIT-LICENSE).
-
