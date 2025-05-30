@@ -48,7 +48,7 @@ module Mongoid
       # @return [Array] with [self, radius]
       #
       def radius(r = 1)
-        [mongoize, r]
+        [ mongoize, r ]
       end
 
       #
