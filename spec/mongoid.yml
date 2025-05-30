@@ -1,0 +1,298 @@
+development:
+  # Configure available database clients. (required)
+  clients:
+    # Defines the default client. (required)
+    default:
+      # Mongoid can connect to a URI accepted by the driver:
+      # uri: mongodb://user:password@mongodb.domain.com:27017/queroir_development
+
+      # Otherwise define the parameters separately.
+      # This defines the name of the default database that Mongoid can connect to.
+      # (required).
+      database: mongoid_geospatial_dev
+      # Provides the hosts the default client can connect to. Must be an array
+      # of host:port pairs. (required)
+      hosts:
+        - localhost:28017
+      options:
+        # Note that all options listed below are Ruby driver client options (the mongo gem).
+        # Please refer to the driver documentation of the version of the mongo gem you are using
+        # for the most up-to-date list of options.
+
+        # Change the default write concern. (default = { w: 1 })
+        # write:
+        #   w: 1
+
+        # Change the default read preference. Valid options for mode are: :secondary,
+        # :secondary_preferred, :primary, :primary_preferred, :nearest
+        # (default: primary)
+        # read:
+        #   mode: :secondary_preferred
+        #   tag_sets:
+        #     - use: web
+
+        # The name of the user for authentication.
+        # user: 'user'
+
+        # The password of the user for authentication.
+        # password: 'password'
+
+        # The user's database roles.
+        # roles:
+        #   - 'dbOwner'
+
+        # Change the default authentication mechanism. Valid options include:
+        # :scram, :scram256, :mongodb_cr, :mongodb_x509, :gssapi, :aws, :plain.
+        # MongoDB Server defaults to :scram, which will use "SCRAM-SHA-256" if available,
+        # otherwise fallback to "SCRAM-SHA-1" (:scram256 will always use "SCRAM-SHA-256".)
+        # This setting is handled by the MongoDB Ruby Driver. Please refer to:
+        # https://mongodb.com/docs/ruby-driver/current/reference/authentication/
+        # auth_mech: :scram
+
+        # The database or source to authenticate the user against.
+        # (default: the database specified above or admin)
+        # auth_source: admin
+
+        # Force the driver cluster to behave in a certain manner instead of auto-discovering.
+        # Can be one of: :direct, :replica_set, :sharded. Set to :direct
+        # when connecting to hidden members of a replica set.
+        # connect: :direct
+
+        # Changes the default time in seconds the server monitors refresh their status
+        # via hello commands. (default: 10)
+        # heartbeat_frequency: 10
+
+        # The time in seconds for selecting servers for a near read preference. (default: 0.015)
+        # local_threshold: 0.015
+
+        # The timeout in seconds for selecting a server for an operation. (default: 30)
+        # server_selection_timeout: 30
+
+        # The maximum number of connections in the connection pool. (default: 5)
+        # max_pool_size: 5
+
+        # The minimum number of connections in the connection pool. (default: 1)
+        # min_pool_size: 1
+
+        # The time to wait, in seconds, in the connection pool for a connection
+        # to be checked in before timing out. (default: 5)
+        # wait_queue_timeout: 5
+
+        # The time to wait to establish a connection before timing out, in seconds.
+        # (default: 10)
+        # connect_timeout: 10
+
+        # How long to wait for a response for each operation sent to the
+        # server. This timeout should be set to a value larger than the
+        # processing time for the longest operation that will be executed
+        # by the application. Note that this is a client-side timeout;
+        # the server may continue executing an operation after the client
+        # aborts it with the SocketTimeout exception.
+        # (default: nil, meaning no timeout)
+        # socket_timeout: 5
+
+        # The name of the replica set to connect to. Servers provided as seeds that do
+        # not belong to this replica set will be ignored.
+        # replica_set: name
+
+        # Compressors to use for wire protocol compression. (default is to not use compression)
+        # "zstd" requires zstd-ruby gem. "snappy" requires snappy gem.
+        # Refer to: https://www.mongodb.com/docs/ruby-driver/current/reference/create-client/#compression
+        # compressors: ["zstd", "snappy", "zlib"]
+
+        # Whether to connect to the servers via ssl. (default: false)
+        # ssl: true
+
+        # The certificate file used to identify the connection against MongoDB.
+        # ssl_cert: /path/to/my.cert
+
+        # The private keyfile used to identify the connection against MongoDB.
+        # Note that even if the key is stored in the same file as the certificate,
+        # both need to be explicitly specified.
+        # ssl_key: /path/to/my.key
+
+        # A passphrase for the private key.
+        # ssl_key_pass_phrase: password
+
+        # Whether to do peer certification validation. (default: true)
+        # ssl_verify: true
+
+        # The file containing concatenated certificate authority certificates
+        # used to validate certs passed from the other end of the connection.
+        # ssl_ca_cert: /path/to/ca.cert
+
+        # Whether to truncate long log lines. (default: true)
+        # truncate_logs: true
+
+  # Configure Mongoid-specific options. (optional)
+  options:
+    # Allow BSON::Decimal128 to be parsed and returned directly in
+    # field values. When BSON 5 is present and the this option is set to false
+    # (the default), BSON::Decimal128 values in the database will be returned
+    # as BigDecimal.
+    #
+    # @note this option only has effect when BSON 5+ is present. Otherwise,
+    #   the setting is ignored.
+    # allow_bson5_decimal128: false
+
+    # When this flag is false, named scopes cannot unset a default scope.
+    # This is the traditional (and default) behavior in Mongoid 9 and earlier.
+    #
+    # Setting this flag to true will allow named scopes to unset the default
+    # scope. This will be the default in Mongoid 10.
+    #
+    # See https://jira.mongodb.org/browse/MONGOID-5785 for more details.
+    # allow_scopes_to_unset_default_scope: false
+
+    # Application name that is printed to the MongoDB logs upon establishing
+    # a connection. Note that the name cannot exceed 128 bytes in length.
+    # It is also used as the database name if the database name is not
+    # explicitly defined.
+    app_name: mongoid_geospatial
+
+    # When this flag is false, callbacks for embedded documents will not be
+    # called. This is the default in 9.0.
+    #
+    # Setting this flag to true restores the pre-9.0 behavior, where callbacks
+    # for embedded documents are called. This may lead to stack overflow errors
+    # if there are more than cicrca 1000 embedded documents in the root
+    # document's dependencies graph.
+    # See https://jira.mongodb.org/browse/MONGOID-5658 for more details.
+    # around_callbacks_for_embeds: false
+
+    # Sets the async_query_executor for the application. By default the thread pool executor
+    #   is set to `:immediate. Options are:
+    #
+    #   - :immediate - Initializes a single +Concurrent::ImmediateExecutor+
+    #   - :global_thread_pool - Initializes a single +Concurrent::ThreadPoolExecutor+
+    #      that uses the +async_query_concurrency+ for the +max_threads+ value.
+    # async_query_executor: :immediate
+
+    # Mark belongs_to associations as required by default, so that saving a
+    # model with a missing belongs_to association will trigger a validation
+    # error.
+    # belongs_to_required_by_default: true
+
+    # Set the global discriminator key.
+    # discriminator_key: "_type"
+
+    # Raise an exception when a field is redefined.
+    # duplicate_fields_exception: false
+
+    # Defines how many asynchronous queries can be executed concurrently.
+    # This option should be set only if `async_query_executor` is set
+    # to `:global_thread_pool`.
+    # global_executor_concurrency: nil
+
+    # When this flag is true, any attempt to change the _id of a persisted
+    # document will raise an exception (`Errors::ImmutableAttribute`).
+    # This is the default in 9.0. Setting this flag to false restores the
+    # pre-9.0 behavior, where changing the _id of a persisted
+    # document might be ignored, or it might work, depending on the situation.
+    # immutable_ids: true
+
+    # Include the root model name in json serialization.
+    # include_root_in_json: false
+
+    # # Include the _type field in serialization.
+    # include_type_for_serialization: false
+
+    # Whether to join nested persistence contexts for atomic operations
+    # to parent contexts by default.
+    # join_contexts: false
+
+    # When this flag is false (the default as of Mongoid 9.0), a document that
+    # is created or loaded will remember the storage options that were active
+    # when it was loaded, and will use those same options by default when
+    # saving or reloading itself.
+    #
+    # When this flag is true you'll get pre-9.0 behavior, where a document will
+    # not remember the storage options from when it was loaded/created, and
+    # subsequent updates will need to explicitly set up those options each time.
+    #
+    # For example:
+    #
+    #    record = Model.with(collection: 'other_collection') { Model.first }
+    #
+    # This will try to load the first document from 'other_collection' and
+    # instantiate it as a Model instance. Pre-9.0, the record object would
+    # not remember that it came from 'other_collection', and attempts to
+    # update it or reload it would fail unless you first remembered to
+    # explicitly specify the collection every time.
+    #
+    # As of Mongoid 9.0, the record will remember that it came from
+    # 'other_collection', and updates and reloads will automatically default
+    # to that collection, for that record object.
+    # legacy_persistence_context_behavior: false
+
+    # When this flag is false, a document will become read-only only once the
+    # #readonly! method is called, and an error will be raised on attempting
+    # to save or update such documents, instead of just on delete. When this
+    # flag is true, a document is only read-only if it has been projected
+    # using #only or #without, and read-only documents will not be
+    # deletable/destroyable, but they will be savable/updatable.
+    # When this feature flag is turned on, the read-only state will be reset on
+    # reload, but when it is turned off, it won't be.
+    # legacy_readonly: false
+
+    # The log level.
+    #
+    # It must be set prior to referencing clients or Mongo.logger,
+    # changes to this option are not be propagated to any clients and
+    # loggers that already exist.
+    #
+    # Additionally, only when the clients are configured via the
+    # configuration file is the log level given by this option honored.
+    # log_level: :info
+
+    # Store BigDecimals as Decimal128s instead of strings in the db.
+    # map_big_decimal_to_decimal128: true
+
+    # Preload all models in development, needed when models use inheritance.
+    # preload_models: false
+
+    # When this flag is true, callbacks for every embedded document will be
+    # called only once, even if the embedded document is embedded in multiple
+    # documents in the root document's dependencies graph.
+    # This is the default in 9.0. Setting this flag to false restores the
+    # pre-9.0 behavior, where callbacks are called for every occurrence of an
+    # embedded document. The pre-9.0 behavior leads to a problem that for multi
+    # level nested documents callbacks are called multiple times.
+    # See https://jira.mongodb.org/browse/MONGOID-5542
+    # prevent_multiple_calls_of_embedded_callbacks: true
+
+    # Raise an error when performing a #find and the document is not found.
+    # raise_not_found_error: true
+
+    # Raise an error when defining a scope with the same name as an
+    # existing method.
+    # scope_overwrite_exception: false
+
+    # Return stored times as UTC.
+    use_utc: true
+
+  # Configure Driver-specific options. (optional)
+  driver_options:
+    # When this flag is off, an aggregation done on a view will be executed over
+    # the documents included in that view, instead of all documents in the
+    # collection. When this flag is on, the view fiter is ignored.
+    # broken_view_aggregate: true
+
+    # When this flag is set to false, the view options will be correctly
+    # propagated to readable methods.
+    # broken_view_options: true
+
+    # When this flag is set to true, the update and replace methods will
+    # validate the paramters and raise an error if they are invalid.
+    # validate_update_replace: false
+
+test:
+  clients:
+    default:
+      database: mongoid_geospatial_test
+      hosts:
+        - localhost:28017
+      options:
+        read:
+          mode: :primary
+        max_pool_size: 1

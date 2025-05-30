@@ -1,6 +1,5 @@
 require 'mongoid'
-# require 'active_support/core_ext/string/inflections'
-# require 'active_support/concern'
+require 'active_support/concern' # Explicitly require for `extend ActiveSupport::Concern`
 require 'mongoid/geospatial/helpers/spatial'
 require 'mongoid/geospatial/helpers/sphere'
 require 'mongoid/geospatial/helpers/delegate'
@@ -55,7 +54,6 @@ module Mongoid
     @@earth_radius = EARTH_RADIUS.dup
 
     included do
-      # attr_accessor :geo
       cattr_accessor :spatial_fields, :spatial_fields_indexed
       self.spatial_fields = []
       self.spatial_fields_indexed = []
@@ -72,14 +70,10 @@ module Mongoid
     # Methods applied to Document's class
     module ClassMethods
       #
-      # Create Spatial index for given field
+      # Creates a 2d spatial index for the given field.
       #
-      #
-      # @param [String,Symbol] name
-      # @param [Hash] options options for spatial_index
-      #
-      # http://www.mongodb.org/display/DOCS/Geospatial+Indexing
-      # #GeospatialIndexing-geoNearCommand
+      # @param name [String, Symbol] The name of the field to index.
+      # @param options [Hash] Additional options for the index.
       #
       def spatial_index(name, options = {})
         spatial_fields_indexed << name
@@ -87,35 +81,87 @@ module Mongoid
       end
 
       #
-      # Creates Sphere index for given field
+      # Creates a 2dsphere index for the given field, suitable for spherical geometry calculations.
       #
+      # @param name [String, Symbol] The name of the field to index.
+      # @param options [Hash] Additional options for the index.
       #
-      # @param [String,Symbol] name
-      # @param [Hash] options options for spatial_index
-      #
-      # http://www.mongodb.org/display/DOCS/Geospatial+Indexing
-      # #GeospatialIndexing-geoNearCommand
       def sphere_index(name, options = {})
         spatial_fields_indexed << name
         index({ name => '2dsphere' }, options)
       end
 
       #
-      # Creates Sphere index for given field
+      # Defines a class method to find the closest document to a given point
+      # using the specified spatial field via the `geoNear` command.
       #
+      # @param field_name [String, Symbol] The name of the spatial field to query.
+      # @param default_geo_near_options [Hash] Default options for the geoNear command
+      #        (e.g., `{ spherical: true, max_distance: 1000 }`).
+      #        The `key` option will be automatically set to `field_name`.
       #
-      # @param [String,Symbol] name
-      # @param [Hash] options options for spatial_index
+      # Example:
+      #   class Place
+      #     include Mongoid::Document
+      #     include Mongoid::Geospatial
+      #     field :location, type: Array
+      #     sphere_index :location # Assumes a 2dsphere index for spherical queries
+      #     spatial_scope :location, spherical: true # Default to spherical for this scope
+      #   end
       #
-      # http://www.mongodb.org/display/DOCS/Geospatial+Indexing
-      # #GeospatialIndexing-geoNearCommand
-      def spatial_scope(field, _opts = {})
+      #   Place.closest_to_location([lon, lat]) # Finds the single closest place
+      #   Place.closest_to_location([lon, lat], max_distance: 500) # Override/add options
+      #
+      def spatial_scope(field_name, default_geo_near_options = {})
+        method_name = :"closest_to_#{field_name}"
+        key_name = field_name.to_s
+
         singleton_class.class_eval do
-          # define_method(:close) do |args|
-          define_method(:nearby) do |args|
-            queryable.where(field.near_sphere => args)
+          define_method(method_name) do |coordinates, additional_options = {}|
+            # `coordinates` should be [lon, lat] or a GeoJSON Point hash
+            # e.g., { type: "Point", coordinates: [lon, lat] }
+            geo_near_cmd_options = {
+              near: coordinates,
+              key: key_name
+            }.merge(default_geo_near_options).merge(additional_options)
+
+            queryable.geo_near(geo_near_cmd_options).first
           end
         end
+      end
+
+      #
+      # Provides a convenient way to find documents near a given set of coordinates.
+      # It automatically uses the first spatial field defined in the model and
+      # determines whether to use a planar (.near) or spherical (.near_sphere)
+      # query based on the field's definition options (`spatial: true` vs `sphere: true`).
+      #
+      # @param coordinates [Array, Mongoid::Geospatial::Point] The coordinates (e.g., [lon, lat])
+      #   or a Point object to find documents near to.
+      # @param _options [Hash] Optional hash for future extensions (currently unused).
+      #
+      # @return [Mongoid::Criteria] A criteria object for the query.
+      #
+      # Example:
+      #   Bar.nearby([10, 20])
+      #   Alarm.nearby(my_point_object)
+      #
+      def nearby(coordinates, _options = {})
+        if self.spatial_fields.empty?
+          raise "No spatial fields defined for #{self.name} to use with .nearby. " \
+                "Mark a field with 'spatial: true' or 'sphere: true'."
+        end
+
+        field_name_sym = self.spatial_fields.first.to_sym
+        field_definition = self.fields[field_name_sym.to_s]
+
+        unless field_definition
+          raise "Could not find field definition for spatial field: #{field_name_sym}"
+        end
+
+        query_operator = field_definition.options[:sphere] ? :near_sphere : :near
+
+        criteria.where(field_name_sym.send(query_operator) => coordinates)
       end
     end
   end

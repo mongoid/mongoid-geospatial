@@ -1,4 +1,3 @@
-# require 'pry'
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
@@ -13,15 +12,9 @@ if ENV['CI']
 end
 
 require 'rspec'
-# require 'mongoid'
-# require "mocha"
 require 'mongoid/geospatial'
 
-LOGGER = Logger.new($stdout)
-
-Mongoid.configure do |config|
-  config.connect_to('mongoid_geo_test')
-end
+Mongoid.load!(File.expand_path('../mongoid.yml', __FILE__), :test)
 
 # Autoload every model for the test suite that sits in spec/app/models.
 Dir[File.join(MODELS, '*.rb')].sort.each do |file|
@@ -29,18 +22,14 @@ Dir[File.join(MODELS, '*.rb')].sort.each do |file|
   autoload name.camelize.to_sym, name
 end
 
-Dir[File.join(SUPPORT, '*.rb')].each { |file| require File.basename(file) }
+# Require all support files.
+Dir[File.join(SUPPORT, '*.rb')].sort.each { |file| require file }
 
 RSpec.configure do |config|
-  # config.mock_with(:mocha)
-
   config.before(:each) do
     Mongoid.purge!
   end
 end
 
 Mongo::Logger.logger.level = Logger::INFO if Mongoid::VERSION >= '5'
-
-# Mongoid.load!(File.expand_path('../support/mongoid.yml', __FILE__), :test)
-
 puts "Running with Mongoid v#{Mongoid::VERSION}"
