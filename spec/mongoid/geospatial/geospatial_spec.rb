@@ -144,7 +144,7 @@ describe Mongoid::Geospatial do
       before do
         Alarm.create_indexes
         50.times do
-          Alarm.create(spot: [rand(10) + 1, rand(10) + 1])
+          Alarm.create(spot: [rand(1..10), rand(1..10)])
         end
       end
 

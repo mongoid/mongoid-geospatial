@@ -18,6 +18,7 @@ module Mongoid
       # @return (Array)
       def mongoize
         return nil unless x && y
+
         [x, y]
       end
       alias to_a mongoize
@@ -156,6 +157,7 @@ module Mongoid
           when NilClass then nil
           else
             return obj.to_xy if obj.respond_to?(:to_xy)
+
             raise 'Invalid Point'
           end
         end
@@ -183,6 +185,7 @@ module Mongoid
         #
         def from_string(str)
           return nil if str.empty?
+
           str.split(/,|\s/).reject(&:empty?).map(&:to_f)
         end
 
@@ -197,6 +200,7 @@ module Mongoid
         #
         def from_array(array)
           return nil if array.empty?
+
           array.flatten[0..1].map(&:to_f)
         end
 
@@ -216,19 +220,22 @@ module Mongoid
         #
         def from_hash(hsh)
           raise 'Hash must have at least 2 items' if hsh.size < 2
+
           [from_hash_x(hsh), from_hash_y(hsh)]
         end
 
         def from_hash_y(hsh)
-          v = (Mongoid::Geospatial.lat_symbols & hsh.keys).first
+          v = (Mongoid::Geospatial::Config::Point.y & hsh.keys).first
           return hsh[v].to_f if !v.nil? && hsh[v]
-          raise "Hash must contain #{Mongoid::Geospatial.lat_symbols.inspect}"
+
+          raise "Hash must contain #{Mongoid::Geospatial::Config::Point.y.inspect}"
         end
 
         def from_hash_x(hsh)
-          v = (Mongoid::Geospatial.lng_symbols & hsh.keys).first
+          v = (Mongoid::Geospatial::Config::Point.x & hsh.keys).first
           return hsh[v].to_f if !v.nil? && hsh[v]
-          raise "Hash must contain #{Mongoid::Geospatial.lng_symbols.inspect}"
+
+          raise "Hash must contain #{Mongoid::Geospatial::Config::Point.x.inspect}"
         end
       end # << self
     end # Point

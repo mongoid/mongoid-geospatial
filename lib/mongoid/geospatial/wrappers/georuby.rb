@@ -16,6 +16,7 @@ module Mongoid
       # @return (GeoRuby::SimpleFeatures::Point)
       def to_geo
         return unless valid?
+
         GeoRuby::SimpleFeatures::Point.xy(x, y)
       end
 

@@ -1,4 +1,3 @@
-# encoding: utf-8
 module Support #:nodoc:
   # module Authentication
   #   extend self

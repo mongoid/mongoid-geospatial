@@ -1,5 +1,4 @@
-# -*- encoding: utf-8 -*-
-require File.expand_path('../lib/mongoid/geospatial/version', __FILE__)
+require File.expand_path('lib/mongoid/geospatial/version', __dir__)
 
 Gem::Specification.new do |gem|
   gem.authors       = ['Ryan Ong', 'Marcos Piccinini']

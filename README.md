@@ -6,21 +6,17 @@ A Mongoid Extension that simplifies the use of MongoDB spatial features.
 [![Gem Version](https://badge.fury.io/rb/mongoid-geospatial.svg)](http://badge.fury.io/rb/mongoid-geospatial)
 [![Code Climate](https://codeclimate.com/github/mongoid/mongoid-geospatial.svg)](https://codeclimate.com/github/mongoid/mongoid-geospatial)
 [![Coverage Status](https://coveralls.io/repos/github/mongoid/mongoid-geospatial/badge.svg?branch=master)](https://coveralls.io/github/mongoid/mongoid-geospatial?branch=master)
-[![Dependency Status](https://gemnasium.com/mongoid/mongoid-geospatial.svg)](https://gemnasium.com/mongoid/mongoid-geospatial)
 [![Build Status](https://travis-ci.org/mongoid/mongoid-geospatial.svg?branch=master)](https://travis-ci.org/mongoid/mongoid-geospatial)
 
 Quick Start
 -----------
 
-This gem focus on (making helpers for) MongoDB's spatial features.
-But you may also use an external Geometric/Spatial gem alongside.
+This gem focuses on (making helpers for) MongoDB's spatial features using Mongoid 5, 6 and 7.
 
 ```ruby
 # Gemfile
-gem 'mongoid-geospatial', require: 'mongoid/geospatial'
+gem 'mongoid-geospatial'
 ```
-
-Use version 5.x for Mongoid 5 and version 4.x for Mongoid 4.
 
 A `Place` to illustrate `Point`, `Line` and `Polygon`
 
@@ -60,12 +56,14 @@ rake db:mongoid:create_indexes
 
 Or programatically:
 
-```
+```ruby
 Place.create_indexes
 ```
 
 Points
 ------
+
+This gem defines a specific `Point` class under the Mongoid::Geospatial namespace. Make sure to use `type: ::Mongoid::Geospatial::Point` to avoid name errors or collisions with other `Point` classes you might already have defined `NameError`s.
 
 Currently, MongoDB supports query operations on 2D points only, so that's what this lib does. All geometries apart from points are just arrays in the database. Here's is how you can input a point as:
 
@@ -73,6 +71,8 @@ Currently, MongoDB supports query operations on 2D points only, so that's what t
 * an unordered hash with latitude key(:lat, :latitude) and a longitude key(:lon, :long, :lng, :longitude)
 * an ordered hash with longitude as the first item and latitude as the second item; this hash does not have include the latitude and longitude keys
 * anything with the a method #to_xy or #to_lng_lat that converts itself to  [long, lat] array
+
+_Note: the convention of having longitude as the first coordinate may vary for other libraries. For instance, Google Maps often refer to "LatLng". Make sure you keep those differences in mind. See below for how to configure this library for LatLng._
 
 We store data in the DB as a [x, y] array then reformat when it is returned to you
 
@@ -327,13 +327,16 @@ With GeoRuby
 Mongoid::Geospatial.with_georuby!
 ```
 
-Defaults (change if you know what you're doing)
+By default the convention of this library is LngLat, configure it for LatLng as follows.
 
 ```ruby
-Mongoid::Geospatial.lng_symbol = :x
-Mongoid::Geospatial.lat_symbol = :y
-Mongoid::Geospatial.earth_radius = EARTH_RADIUS
+Mongoid::Geospatial.configure do |config|
+  config.point.x = Mongoid::Geospatial.lat_symbols
+  config.point.y = Mongoid::Geospatial.lng_symbols
+end
 ```
+
+You will need to manually migrate any existing `Point` data if you change configuration in an existing system.
 
 This Fork
 ---------
@@ -387,14 +390,12 @@ Model.create_indexes
 Contributing
 ------------
 
-* Have mongod running
-* Install dev gems with `bundle install`
-* Run `rake spec`, `spec spec` or `guard`
+See [CONTRIBUTING](CONTRIBUTING.md).
 
 License
 -------
 
-Copyright (c) 2009-2015 Mongoid Geospatial Authors
+Copyright (c) 2009-2017 Mongoid Geospatial Authors
 
 MIT License, see [MIT-LICENSE](MIT-LICENSE).
 

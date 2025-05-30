@@ -35,6 +35,7 @@ Dir[File.join(SUPPORT, '*.rb')].sort.each { |file| require file }
 RSpec.configure do |config|
   config.before(:each) do
     Mongoid.purge!
+    Mongoid::Geospatial::Config.reset!
   end
 end
 

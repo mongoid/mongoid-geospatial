@@ -7,7 +7,7 @@ cache: bundler
 services: mongodb
 
 rvm:
-  - 2.3.1
+  - 2.5.3
 
 before_install:
   - gem update bundler
@@ -21,3 +21,13 @@ addons:
       - mongodb-3.2-precise
     packages:
       - mongodb-org-server
+
+env:
+  - MONGOID_VERSION=5
+  - MONGOID_VERSION=6
+  - MONGOID_VERSION=7
+  - MONGOID_VERSION=HEAD
+
+matrix:
+  allow_failures:
+    - env: MONGOID_VERSION=HEAD
