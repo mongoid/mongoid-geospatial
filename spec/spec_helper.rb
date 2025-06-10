@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
@@ -14,7 +16,7 @@ end
 require 'rspec'
 require 'mongoid/geospatial'
 
-Mongoid.load!(File.expand_path('../mongoid.yml', __FILE__), :test)
+Mongoid.load!(File.expand_path('mongoid.yml', __dir__), :test)
 
 if ENV['DEBUG'] == 'true'
   Mongo::Logger.logger.level = Logger::DEBUG
@@ -24,13 +26,13 @@ end
 # Mongo::Logger.logger.level = Logger::DEBUG
 
 # Autoload every model for the test suite that sits in spec/app/models.
-Dir[File.join(MODELS, '*.rb')].sort.each do |file|
+Dir[File.join(MODELS, '*.rb')].each do |file|
   name = File.basename(file, '.rb')
   autoload name.camelize.to_sym, name
 end
 
 # Require all support files.
-Dir[File.join(SUPPORT, '*.rb')].sort.each { |file| require file }
+Dir[File.join(SUPPORT, '*.rb')].each { |file| require file }
 
 RSpec.configure do |config|
   config.before(:each) do

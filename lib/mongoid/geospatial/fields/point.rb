@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Mongoid
   module Geospatial
     # Point
@@ -6,10 +8,10 @@ module Mongoid
       include Enumerable
       attr_accessor :x, :y, :z
 
-      def initialize(x, y, z = nil)
-        @x = x
-        @y = y
-        @z = z
+      def initialize(lon, lat, alt = nil)
+        @x = lon
+        @y = lat
+        @z = alt
       end
 
       # Object -> Database
@@ -35,11 +37,12 @@ module Mongoid
 
       #
       # Point representation as a Hash
+      # Optional param: custom keys.
       #
-      # @return [Hash] with { xl => x, yl => y }
+      # @return [Hash] with { lng_key => x, lat_key => y }
       #
-      def to_hsh(xl = :x, yl = :y)
-        { xl => x, yl => y }
+      def to_hsh(xkey = :x, ykey = :y)
+        { xkey => x, ykey => y }
       end
       alias to_hash to_hsh
 
@@ -48,8 +51,8 @@ module Mongoid
       #
       # @return [Array] with [self, radius]
       #
-      def radius(r = 1)
-        [ mongoize, r ]
+      def radius(r = 1) # rubocop:disable Naming/MethodParameterName
+        [mongoize, r]
       end
 
       #
@@ -59,7 +62,7 @@ module Mongoid
       #
       # @return [Array] with [self, radius / earth radius]
       #
-      def radius_sphere(r = 1, unit = :km)
+      def radius_sphere(r = 1, unit = :km) # rubocop:disable Naming/MethodParameterName
         radius r.to_f / Mongoid::Geospatial.earth_radius[unit]
       end
 
@@ -94,7 +97,7 @@ module Mongoid
       #
       def to_geo_json
         # Return a GeoJSON point hash that MongoDB can use
-        { type: "Point", coordinates: [x, y] }
+        { type: 'Point', coordinates: [x, y] }
       end
 
       #
@@ -237,7 +240,7 @@ module Mongoid
 
           raise "Hash must contain #{Mongoid::Geospatial::Config::Point.x.inspect}"
         end
-      end # << self
-    end # Point
-  end # Geospatial
-end # Mongoid
+      end
+    end
+  end
+end

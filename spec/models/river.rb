@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Sample spec class
 class River
   include Mongoid::Document
@@ -13,7 +15,7 @@ class River
   field :mouth_array, type: Array,        spatial: { return_array: true }
 
   # simplified spatial indexing
-  # you can only index one field in mongodb < 1.9
+  # Note: Modern MongoDB versions support multiple 2d/2dsphere indexes per collection.
   spatial_index :source
   # alternatives
   # index [[ :spatial, Mongo::GEO2D ]], {min:-400, max:400}

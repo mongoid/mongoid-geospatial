@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 #
 # Just for fun
 #
@@ -6,12 +8,10 @@ $LOAD_PATH << File.expand_path('../lib', __dir__)
 
 require 'mongoid/geospatial'
 
-Mongoid.configure do |config|
-  config.connect_to('mongoid_geospatial_bench')
-end
-
 Mongoid::Geospatial.with_georuby!
 Mongoid::Geospatial.with_rgeo!
+
+Mongoid.load!(File.expand_path('mongoid.yml', __dir__), :test)
 
 class NoGeo
   include Mongoid::Document

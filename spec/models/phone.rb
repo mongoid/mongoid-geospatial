@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Sample spec class
 class Phone
   include Mongoid::Document

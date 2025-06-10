@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'mongoid'
 require 'active_support/concern' # Explicitly require for `extend ActiveSupport::Concern`
 require 'mongoid/geospatial/helpers/spatial'
@@ -129,7 +131,7 @@ module Mongoid
                              merged_options[:spherical]
                            else
                              # self.fields uses string keys for field names
-                             field_def = self.fields[field_name.to_s]
+                             field_def = fields[field_name.to_s]
                              field_def && field_def.options[:sphere]
                            end
             query_operator = is_spherical ? :near_sphere : :near
@@ -143,8 +145,8 @@ module Mongoid
                                 {
                                   # Using $geometry for clarity when $maxDistance is used,
                                   # which is standard for $near/$nearSphere operators.
-                                  "$geometry"    => { type: "Point", coordinates: mongoized_coords },
-                                  "$maxDistance" => merged_options[:max_distance].to_f
+                                  '$geometry' => { type: 'Point', coordinates: mongoized_coords },
+                                  '$maxDistance' => merged_options[:max_distance].to_f
                                 }
                               else
                                 mongoized_coords # Simple array [lng, lat] for the operator
@@ -176,13 +178,13 @@ module Mongoid
       #   Alarm.nearby(my_point_object)
       #
       def nearby(coordinates, _options = {})
-        if self.spatial_fields.empty?
+        if spatial_fields.empty?
           raise "No spatial fields defined for #{self.name} to use with .nearby. " \
                 "Mark a field with 'spatial: true' or 'sphere: true'."
         end
 
-        field_name_sym = self.spatial_fields.first.to_sym
-        field_definition = self.fields[field_name_sym.to_s]
+        field_name_sym = spatial_fields.first.to_sym
+        field_definition = fields[field_name_sym.to_s]
 
         unless field_definition
           raise "Could not find field definition for spatial field: #{field_name_sym}"

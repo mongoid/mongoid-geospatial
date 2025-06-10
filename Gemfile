@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 source 'https://rubygems.org'
 
 gem 'mongoid'
@@ -5,16 +7,16 @@ gem 'mongoid'
 gemspec
 
 group :development, :test do
+  gem 'bigdecimal'
   gem 'fuubar'
-  gem 'rake'
+  gem 'georuby'
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-rubocop'
-  gem 'rubocop'
-  gem 'bigdecimal'
-  gem 'georuby'
-  gem 'rgeo'
+  gem 'rake'
   gem 'reline'
+  gem 'rgeo'
+  gem 'rubocop'
 end
 
 group :test do

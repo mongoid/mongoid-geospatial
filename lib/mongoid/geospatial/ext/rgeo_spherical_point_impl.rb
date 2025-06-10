@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RGeo
   module Geographic
     # RGeo Point

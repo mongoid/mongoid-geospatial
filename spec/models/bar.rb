@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Sample spec class
 class Bar
   include Mongoid::Document

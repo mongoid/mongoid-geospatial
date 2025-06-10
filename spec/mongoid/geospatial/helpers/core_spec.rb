@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Mongoid
   module Geospatial
     def self.from_array(ary)
@@ -15,8 +17,8 @@ module Mongoid
       return hsh[v].to_f if !v.nil? && hsh[v]
 
       if Mongoid::Geospatial.lng_symbols.index(hsh.keys[1])
-        raise "Hash cannot contain #{Mongoid::Geospatial.lng_symbols.inspect} "\
-             "as second arg without #{Mongoid::Geospatial.lat_symbols.inspect}"
+        raise "Hash cannot contain #{Mongoid::Geospatial.lng_symbols.inspect} " \
+              "as second arg without #{Mongoid::Geospatial.lat_symbols.inspect}"
       end
       hsh.values[1].to_f
     end
@@ -26,8 +28,8 @@ module Mongoid
       return hsh[v].to_f if !v.nil? && hsh[v]
 
       if Mongoid::Geospatial.lat_symbols.index(keys[0])
-        raise "Hash cannot contain #{Mongoid::Geospatial.lat_symbols.inspect} "\
-             "as first arg without #{Mongoid::Geospatial.lng_symbols.inspect}"
+        raise "Hash cannot contain #{Mongoid::Geospatial.lat_symbols.inspect} " \
+              "as first arg without #{Mongoid::Geospatial.lng_symbols.inspect}"
       end
       values[0].to_f
     end

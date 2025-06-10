@@ -1,4 +1,6 @@
-module Support #:nodoc:
+# frozen_string_literal: true
+
+module Support # :nodoc:
   # module Authentication
   #   extend self
 

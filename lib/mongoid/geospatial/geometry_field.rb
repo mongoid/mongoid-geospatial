@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Mongoid
   module Geospatial
     #
@@ -63,7 +65,7 @@ module Mongoid
       # @param [Numeric] r radius
       # @return [Array]  [point, r] point and radius in mongoid format
       #
-      def radius(r = 1)
+      def radius(r = 1) # rubocop:disable Naming/MethodParameterName
         [center, r]
       end
 
@@ -75,7 +77,7 @@ module Mongoid
       # @see Point#radius
       # @return [Array]
       #
-      def radius_sphere(r = 1, unit = :km)
+      def radius_sphere(r = 1, unit = :km) # rubocop:disable Naming/MethodParameterName
         radius r.to_f / Mongoid::Geospatial.earth_radius[unit]
       end
 

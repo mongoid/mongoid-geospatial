@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Sample spec class
 class Address
   include Mongoid::Document
@@ -45,7 +47,7 @@ class Address
   validates_presence_of :street, on: :update
   validates_format_of :street, with: /\D/, allow_nil: true
 
-  def set_parent=(set = false)
+  def set_parent=(set: false)
     self.parent_title = addressable.title if set
   end
 

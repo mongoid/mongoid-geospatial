@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Mongoid::Geospatial::Point do
@@ -70,9 +72,9 @@ describe Mongoid::Geospatial::Point do
     })
   end
 
-  it "should have a to_json method" do
+  it 'should have a to_json method' do
     bar = Bar.create!(name: "Moe's", location: [1.0009, 21.009])
-    expect(bar.location.to_json).to eq("[1.0009,21.009]")
+    expect(bar.location.to_json).to eq('[1.0009,21.009]')
   end
 
   it 'should have #reverse to get lat, lon' do
@@ -223,19 +225,19 @@ describe Mongoid::Geospatial::Point do
       end
 
       it 'returns the documents within a circle' do
-        pending 'Circle'
+        pending 'Test for standard Mongoid/MongoDB $within behavior with $center operator'
         l = [elvis.location, 500.0 / Mongoid::Geospatial::EARTH_RADIUS_KM]
         expect(Bar.where(:location.within_circle => l).to_a).to include(mile3)
       end
 
       it 'returns the documents within a spherical circle' do
-        pending 'Circle'
+        pending 'Test for standard Mongoid/MongoDB $within behavior with $centerSphere operator'
         expect(Bar.where(:location.within_spherical_circle =>
                          [elvis.location, 0.0005]).to_a).to eq([mile1])
       end
 
       it 'returns the documents within a center circle' do
-        pending 'Circle'
+        pending 'Test for standard Mongoid/MongoDB $within behavior with $center operator (legacy)'
         expect(Bar.where(:location.within_center_circle =>
                          [elvis.location, 0.0005]).to_a).to eq([mile1])
       end

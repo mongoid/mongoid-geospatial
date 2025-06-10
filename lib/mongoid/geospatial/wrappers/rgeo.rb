@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rgeo'
 require 'mongoid/geospatial/ext/rgeo_spherical_point_impl'
 

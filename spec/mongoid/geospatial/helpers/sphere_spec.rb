@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Mongoid::Fields do
@@ -23,7 +25,7 @@ describe Mongoid::Fields do
       expect(Alarm.spatial_fields).to eql([:spot])
     end
 
-    it 'should work fine indexed' do
+    it 'should correctly instantiate the field type when a spherical index is defined' do
       far = Alarm.create!(name: 'Far', spot: [7, 7])
       expect(far.spot).to be_instance_of(Mongoid::Geospatial::Point)
     end

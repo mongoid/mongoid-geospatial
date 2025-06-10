@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Mongoid::Geospatial do
@@ -46,12 +48,12 @@ describe Mongoid::Geospatial do
     end
 
     let!(:foo) do
-      Bar.create!(name: "Foo", location: [3, 3])
+      Bar.create!(name: 'Foo', location: [3, 3])
     end
 
     it 'should work specifing center and different location foo' do
       expect(Bar.nearby(foo.location)).to be_a Mongoid::Criteria
-      expect(Bar.nearby(foo.location).selector).to eq({"location" => {"$near" => [3.0, 3.0]}})
+      expect(Bar.nearby(foo.location).selector).to eq({ 'location' => { '$near' => [3.0, 3.0] } })
     end
 
     it 'should work specifing center and different location moes' do
@@ -92,12 +94,12 @@ describe Mongoid::Geospatial do
         .to eq([rose, moes, jane, foo])
     end
 
-    it 'returns the documents sorted closest to furthest' do
+    it 'returns the documents sorted closest to furthest with limit' do
       expect(Bar.closest_to_location(rose.location).limit(2))
         .to eq([rose, moes])
     end
 
-    it 'returns the documents sorted closest to furthest' do
+    it 'returns the first document when sorted closest to furthest' do
       expect(Bar.closest_to_location(rose.location).first).to eq(rose)
     end
 

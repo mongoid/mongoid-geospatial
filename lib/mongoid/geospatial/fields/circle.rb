@@ -1,10 +1,10 @@
+# frozen_string_literal: true
+
 module Mongoid
   module Geospatial
     # Circle
     #
     class Circle < GeometryField
-      attr_accessor :center, :radius
-
       def center
         Point.new(*self[0])
       end
