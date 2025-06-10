@@ -9,7 +9,12 @@ group :development, :test do
   gem 'rake'
   gem 'guard'
   gem 'guard-rspec'
+  gem 'guard-rubocop'
   gem 'rubocop'
+  gem 'bigdecimal'
+  gem 'georuby'
+  gem 'rgeo'
+  gem 'reline'
 end
 
 group :test do

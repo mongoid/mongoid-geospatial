@@ -1,0 +1,38 @@
+{
+    "name": "Ruby Gem with Mongoid",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "app",
+    "workspaceFolder": "/workspace",
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "rebornix.ruby",
+                "wingrunr21.vscode-ruby",
+                "castwide.solargraph",
+                "kaiwood.endwise",
+                "misogi.ruby-rubocop",
+                "mongodb.mongodb-vscode"
+            ],
+            "settings": {
+                "ruby.useBundler": true,
+                "ruby.useLanguageServer": true,
+                "ruby.lint": {
+                    "rubocop": {
+                        "useBundler": true
+                    }
+                },
+                "ruby.format": "rubocop",
+                "editor.formatOnSave": true
+            }
+        }
+    },
+
+    "postCreateCommand": "bundle install",
+
+    "remoteUser": "vscode",
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    }
+}
