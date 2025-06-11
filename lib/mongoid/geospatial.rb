@@ -224,8 +224,92 @@ module Mongoid
 
         criteria.where(field_name_sym.send(query_operator) => coordinates)
       end
+
+      # Performs a $geoNear aggregation pipeline stage to find documents near a point,
+      # returning them sorted by distance and including the distance.
+      #
+      # This method is a wrapper around the MongoDB `$geoNear` aggregation stage,
+      # which allows for more complex queries and options than the simple `near` or `near_sphere` methods.
+      #
+      # * But it's not chainable like a standard Mongoid query *
+      #
+      # @param field_name [String, Symbol] The name of the geospatial field to query.
+      #   This field must be indexed with a geospatial index (2d or 2dsphere).
+      # @param coordinates [Array, Hash, Mongoid::Geospatial::Point] The point to search near.
+      #   Examples: `[lng, lat]`, `{ type: 'Point', coordinates: [lng, lat] }`, a `Mongoid::Geospatial::Point` object.
+      # @param options [Hash] Options for the $geoNear stage.
+      #   Key options include:
+      #   - `:spherical` [Boolean] If true, calculates distances using spherical geometry. Defaults to `false`.
+      #   - `:distanceField` [String] Name of the output field that will contain the distance. Defaults to `'distance'`.
+      #   - `:maxDistance` [Numeric] The maximum distance from the center point that documents can be.
+      #     For spherical queries, specify distance in meters. For 2d queries, in the same units as coordinates.
+      #   - `:minDistance` [Numeric] The minimum distance. (MongoDB 2.6+)
+      #   - `:query` [Hash] Limits the results to the documents that match the query.
+      #   - `:limit` [Integer] The maximum number of documents to return (applied as a separate `$limit` pipeline stage).
+      #   - `:distanceMultiplier` [Numeric] A factor to multiply all distances returned by the query.
+      #   - `:includeLocs` [String] name of the output field that identifies the location used to calculate the distance.
+      #
+      # @return [Mongoid::Contextual::Aggregable] An aggregable context representing the $geoNear pipeline.
+      #   The results will be documents that include the field specified by `:distanceField`.
+      #
+      # @raise [ArgumentError] If coordinates cannot be mongoized.
+      #
+      # Example:
+      #   # Find places near [10, 20], using spherical calculations, up to 5km away
+      #   Place.geo_near(:location, [10, 20],
+      #                  spherical: true,
+      #                  maxDistance: 5000, # 5 kilometers in meters
+      #                  distanceField: 'dist.calculated',
+      #                  query: { category: 'restaurant' },
+      #                  limit: 10)
+      #
+      #   # Iterate over results
+      #   Place.geo_near(:location, [10, 20], spherical: true).each do |place|
+      #     puts "#{place.name} is #{place.distance} meters away." # Assumes distanceField is 'distance'
+      #   end
+      #
+      def geo_near(field_name, coordinates, options = {})
+        mongoized_coords = Mongoid::Geospatial::Point.mongoize(coordinates)
+
+        raise ArgumentError, "Invalid coordinates provided: #{coordinates.inspect}" unless mongoized_coords
+
+        # Prepare options for the $geoNear stage, separating out :limit
+        limit_value = options.delete(:limit)
+
+        # Base options for $geoNear stage
+        geo_near_stage_options = {
+          near: mongoized_coords,
+          distanceField: 'distance', # Default output field for distance
+          spherical: false # Default to planar calculations
+        }.merge(options) # Merge remaining user options
+
+        # Ensure :spherical is a strict boolean if it was provided in options.
+        geo_near_stage_options[:spherical] = !!geo_near_stage_options[:spherical] if geo_near_stage_options.key?(:spherical)
+
+        # The 'key' option for $geoNear specifies the geospatial field.
+        # This helper uses the `field_name` argument for this, ensuring it's authoritative.
+        geo_near_stage_options[:key] = field_name.to_s
+
+        # Remove any helper-specific parameters that might have been passed in `options`
+        # if they are handled by dedicated parameters of this Ruby method.
+        geo_near_stage_options.delete(:coordinates) # Handled by `coordinates` param
+        # :field_name is not an option for $geoNear, it's used for `key`
+
+        # Construct the initial pipeline with the $geoNear stage
+        pipeline = [{ '$geoNear' => geo_near_stage_options }]
+
+        # Add $limit stage if limit_value is present
+        pipeline << { '$limit' => limit_value.to_i } if limit_value
+
+        # Execute the aggregation
+        aggregated_results = collection.aggregate(pipeline)
+
+        # Map results to Mongoid objects
+        # Mongoid's instantiate method will create model instances and assign
+        # attributes from the aggregation result, including dynamic ones like distanceField.
+        aggregated_results.map { |attrs| instantiate(attrs) }
+      end
     end
   end
 end
-
 require 'mongoid/geospatial/config'

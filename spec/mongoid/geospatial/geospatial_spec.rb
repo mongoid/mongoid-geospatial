@@ -215,4 +215,29 @@ describe Mongoid::Geospatial do
     #   end
     # end
   end
+
+  context '#geo_near' do
+    before do
+      Bar.create_indexes
+      bar1 = Bar.create!(name: 'Bar1', location: [10, 20])
+      bar2 = Bar.create!(name: 'Bar2', location: [10.1, 20.1])
+      bar3 = Bar.create!(name: 'Bar3', location: [21, 21])
+      @bars = [bar1, bar2, bar3]
+    end
+          #   # Find places near [10, 20], using spherical calculations, up to 5km away
+      #   Place.geo_near(:location, [10, 20],
+      #                  spherical: true,
+      #                  maxDistance: 5000, # 5 kilometers in meters
+      #                  distanceField: 'dist.calculated',
+      #                  query: { category: 'restaurant' },
+      #                  limit: 10)
+      #
+      #   # Iterate over results
+      #   Place.geo_near(:location, [10, 20], spherical: true).each do |place|
+      #     puts "#{place.name} is #{place.distance} meters away." # Assumes distanceField is 'distance'
+      #   end
+    it 'should return places near a point' do
+      expect(Bar.geo_near(:location, [10, 20]).to_a).to eq(@bars)
+    end
+  end
 end

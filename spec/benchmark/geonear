@@ -1,0 +1,75 @@
+#!/usr/bin/env ruby
+
+# frozen_string_literal: true
+
+$LOAD_PATH << File.expand_path('../lib', __dir__)
+
+require 'mongoid/geospatial'
+
+Mongoid.load!(File.expand_path('../mongoid.yml', __dir__), :test)
+
+class Cafe
+  include Mongoid::Document
+  include Mongoid::Geospatial
+  field :name
+  field :geom, type: Point, spatial: true
+  spatial_index :geom
+  spatial_scope :geom
+end
+
+class Cafe2d
+  include Mongoid::Document
+  include Mongoid::Geospatial
+  field :name
+  field :geom, type: Point, sphere: true
+  spherical_index :geom
+  spatial_scope :geom, spherical: true
+end
+
+# Mongoid.purge! # keep increasing count ....
+Cafe.create_indexes
+Cafe2d.create_indexes
+
+# [NoGeo, Rider, Cafe].each(&:delete_all)
+100.times do
+  Benchmark.bmbm do |b|
+    t = 1_000
+    b.report("#{t} W Cafe ") do
+      t.times { Cafe.create!(name: 'Bacco', geom: [rand(-90..90), rand(-90..90)]).id }
+    end
+    b.report("#{t} W Cafe2d ") do
+      t.times { Cafe2d.create!(name: 'Bacco2d', geom: [rand(-90..90), rand(-90..90)]).id }
+    end
+  end
+
+  puts 'DONE WRITING'
+  puts "Reading #{Cafe.count} Cafes and #{Cafe2d.count} Cafe2ds"
+
+  Benchmark.bmbm do |b|
+    t = 1000
+
+    b.report("#{t} R Cafe   closest_to") do
+      t.times { Cafe.closest_to_geom([rand(-90..90), rand(-90..90)]).limit(10).to_a }
+    end
+
+    b.report("#{t} R Cafe   nearby") do
+      t.times { Cafe.nearby([rand(-90..90), rand(-90..90)]).limit(10).to_a }
+    end
+
+    b.report("#{t} R Cafe   geonear") do
+      t.times { Cafe.geo_near(:geom, [rand(-90..90), rand(-90..90)], limit: 10).to_a }
+    end
+
+    b.report("#{t} R Cafe2d closest_to") do
+      t.times { Cafe2d.closest_to_geom([rand(-90..90), rand(-90..90)]).limit(10).to_a }
+    end
+
+    b.report("#{t} R Cafe2d nearby") do
+      t.times { Cafe2d.nearby([rand(-90..90), rand(-90..90)]).limit(10).to_a }
+    end
+
+    b.report("#{t} R Cafe2d geonear") do
+      t.times { Cafe2d.geo_near(:geom, [rand(-90..90), rand(-90..90)], limit: 10, spherical: true).to_a }
+    end
+  end
+end
