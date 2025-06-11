@@ -2,6 +2,7 @@
 
 source 'https://rubygems.org'
 
+gem 'bson', github: 'mongodb/bson-ruby', branch: 'master' # GCC 15 issue
 gem 'mongoid'
 
 gemspec

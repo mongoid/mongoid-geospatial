@@ -1,3 +1,1 @@
---tty
---color
---format documentation
+--require spec_helper -f p -f j --out '/tmp/runnerguard.json' --profile

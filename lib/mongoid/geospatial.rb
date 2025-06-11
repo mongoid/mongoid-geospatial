@@ -94,6 +94,38 @@ module Mongoid
       end
 
       #
+      # # Queries
+      #
+      # MongoDB provides the following geospatial query operators.
+      #
+      # $geoIntersects
+      # Selects geometries that intersect with a GeoJSON geometry.
+      # The 2dsphere index supports $geoIntersects.
+      #
+      # $geoWithin
+      # Selects geometries within a bounding GeoJSON geometry.
+      # The 2dsphere and 2d indexes support $geoWithin.
+      #
+      # $near
+      # Returns geospatial objects in proximity to a point.
+      # Requires a geospatial index. The 2dsphere and 2d indexes support $near.
+      #
+      # $nearSphere
+      # Returns geospatial objects in proximity to a point on a sphere.
+      # Requires a geospatial index. The 2dsphere and 2d indexes support $nearSphere.
+      #
+      # # Aggregation
+      #
+      # MongoDB provides the following geospatial aggregation pipeline stage:
+      #
+      # $geoNear
+      # Returns an ordered stream of documents based on the proximity to a geospatial point.
+      # Incorporates the functionality of $match, $sort, and $limit for geospatial data.
+      # The output documents include an additional distance field and can include a location identifier field.
+      # $geoNear requires a geospatial index.
+      #
+
+      #
       # Defines a class method to find the closest document to a given point
       # using the specified spatial field via the `geoNear` command.
       #
