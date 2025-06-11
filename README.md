@@ -176,26 +176,6 @@ field :location,  type: Point, delegate: true
 
 Now instead of `instance.location.x` you may call `instance.x`.
 
-## Nearby
-
-You can add a `spatial_scope` on your models. So you can query:
-
-```ruby
-Bar.nearby(my.location)
-```
-
-instead of
-
-```ruby
-Bar.near(location: my.location)
-```
-
-Good when you're drunk. Just add to your model:
-
-```ruby
-spatial_scope :<field>
-```
-
 ## Geometry
 
 You can also store Circle, Box, Line (LineString) and Polygons.
@@ -219,29 +199,80 @@ polygon.radius_sphere(5) # [[1.0, 1.0], 0.00048..]
 
 ## Query
 
-Before you proceed, make sure you have read this:
-
-http://mongoid.github.io/old/en/origin/docs/selection.html#standard
-
-All MongoDB queries are handled by Mongoid/Origin.
-
-http://www.rubydoc.info/github/mongoid/origin/Origin/Selectable
-
 You can use Geometry instance directly on any query:
 
-- near
+### near
 
 ```ruby
 Bar.near(location: person.house)
 Bar.where(:location.near => person.house)
 ```
 
-- near_sphere
+### near_sphere
 
 ```ruby
 Bar.near_sphere(location: person.house)
 Bar.where(:location.near_sphere => person.house)
 ```
+
+### nearby
+
+You can add a `spatial_scope` on your models. So you can query:
+
+```ruby
+Bar.nearby(my.location)
+```
+
+instead of
+
+```ruby
+Bar.near(location: my.location)
+```
+
+Good when you're drunk. Just add to your model:
+
+```ruby
+spatial_scope :<field>
+```
+
+### geo_near
+
+The `geo_near` class method provides a more powerful way to query for documents based on proximity,
+using MongoDB's `$geoNear` aggregation pipeline stage. This method allows for more complex
+options and returns the distance to each matched document.
+
+```ruby
+# Find places near [10, 20], using spherical calculations, up to 5km away,
+# and get the distance.
+# The :distanceField option specifies the name of the field that will contain the distance.
+# The :limit option is applied as a separate $limit stage in the aggregation.
+Place.geo_near(:location, [10, 20],
+               spherical: true,
+               maxDistance: 5000, # 5 kilometers in meters for spherical queries
+               distanceField: 'dist.calculated', # Default is 'distance'
+               query: { category: 'restaurant' }, # Optional: filter documents before geoNear
+               limit: 10)
+
+# Iterate over results
+Place.geo_near(:location, [10, 20], spherical: true).each do |place|
+  # 'place.distance' will be available if distanceField was 'distance' (the default)
+  # or 'place.dist_calculated' if distanceField was 'dist.calculated'
+  puts "#{place.name} is #{place.distance || place.dist_calculated} meters away."
+end
+```
+
+Key features and options for `geo_near`:
+
+- `:spherical` (Boolean): If `true`, calculates distances using spherical geometry. Defaults to `false`.
+- `:distanceField` (String): Name of the output field for the calculated distance. Defaults to `'distance'`.
+- `:maxDistance` (Numeric): Maximum distance from the center point. (Meters for spherical, units of coordinates for planar).
+- `:minDistance` (Numeric): Minimum distance from the center point.
+- `:query` (Hash): A query to filter documents _before_ the `$geoNear` stage.
+- `:limit` (Integer): Maximum number of documents to return (applied as a separate `$limit` stage).
+- `:distanceMultiplier` (Numeric): A factor to multiply all distances.
+- `:includeLocs` (String): Name of an output field that will contain the exact location on the document used for the distance calculation. Useful for multi-location fields or complex GeoJSON geometries.
+
+The `geo_near` method returns an array of instantiated Mongoid documents, with the `distanceField` and `includeLocs` field (if specified) available as dynamic attributes on each model instance.
 
 - within_polygon
 
