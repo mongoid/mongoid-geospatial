@@ -6,8 +6,7 @@ module Mongoid
       module Point
         extend self
 
-        attr_accessor :x
-        attr_accessor :y
+        attr_accessor :x, :y
 
         def reset!
           # Now self.x and self.y refer to the public module accessors
