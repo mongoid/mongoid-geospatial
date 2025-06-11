@@ -17,7 +17,7 @@ Gem::Specification.new do |gem|
   gem.metadata['rubygems_mfa_required'] = 'true'
 
   # Use Dir.glob to list all files within the lib directory
-  gem.files = Dir.glob('lib/**/*') + ['README.md', 'LICENSE']
+  gem.files = Dir.glob('lib/**/*') + ['README.md', 'MIT-LICENSE']
   gem.require_paths = ['lib']
 
   gem.add_dependency('mongoid', ['>= 4.0.0'])
