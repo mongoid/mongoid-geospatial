@@ -16,4 +16,5 @@ Gem::Specification.new do |gem|
   gem.version       = Mongoid::Geospatial::VERSION
 
   gem.add_dependency('mongoid', ['>= 4.0.0'])
+  gem.metadata['rubygems_mfa_required'] = 'true'
 end

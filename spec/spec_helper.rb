@@ -18,12 +18,7 @@ require 'mongoid/geospatial'
 
 Mongoid.load!(File.expand_path('mongoid.yml', __dir__), :test)
 
-if ENV['DEBUG'] == 'true'
-  Mongo::Logger.logger.level = Logger::DEBUG
-else
-  Mongo::Logger.logger.level = Logger::INFO
-end
-# Mongo::Logger.logger.level = Logger::DEBUG
+Mongo::Logger.logger.level = ENV['DEBUG'] == 'true' ? Logger::DEBUG : Logger::INFO
 
 # Autoload every model for the test suite that sits in spec/app/models.
 Dir[File.join(MODELS, '*.rb')].each do |file|

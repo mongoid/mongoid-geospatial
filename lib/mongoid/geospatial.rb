@@ -185,7 +185,7 @@ module Mongoid
                               end
 
             # Start with a base criteria, applying an optional filter query
-            current_criteria = merged_options[:query] ? self.where(merged_options[:query]) : self.all
+            current_criteria = merged_options[:query] ? where(merged_options[:query]) : all
 
             # Apply the geospatial query. $near and $nearSphere queries return sorted results.
             current_criteria.where(field_name_sym.send(query_operator) => geo_query_value)
@@ -211,16 +211,14 @@ module Mongoid
       #
       def nearby(coordinates, _options = {})
         if spatial_fields.empty?
-          raise "No spatial fields defined for #{self.name} to use with .nearby. " \
+          raise "No spatial fields defined for #{name} to use with .nearby. " \
                 "Mark a field with 'spatial: true' or 'sphere: true'."
         end
 
         field_name_sym = spatial_fields.first.to_sym
         field_definition = fields[field_name_sym.to_s]
 
-        unless field_definition
-          raise "Could not find field definition for spatial field: #{field_name_sym}"
-        end
+        raise "Could not find field definition for spatial field: #{field_name_sym}" unless field_definition
 
         query_operator = field_definition.options[:sphere] ? :near_sphere : :near
 

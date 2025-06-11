@@ -55,21 +55,19 @@ describe Mongoid::Geospatial::Point do
     end
   end
 
-  it "should have a to_s method" do
-    bar = Bar.create!(name: "Moe's", location: [1, 2])
-    expect(bar.location.to_s).to eq('1.0, 2.0')
+  it 'should have a to_s method that correctly formats points' do
+    bar1 = Bar.create!(name: "Moe's", location: [1, 2])
+    expect(bar1.location.to_s).to eq('1.0, 2.0')
+
+    bar2 = Bar.create!(name: "Moe's", location: [1.0009, 21.009])
+    expect(bar2.location.to_s).to eq('1.0009, 21.009')
   end
 
-  it "should have a to_s method" do
-    bar = Bar.create!(name: "Moe's", location: [1.0009, 21.009])
-    expect(bar.location.to_s).to eq('1.0009, 21.009')
-  end
-
-  it "should have a to_geo_json method" do
+  it 'should have a to_geo_json method' do
     bar = Bar.create!(name: "Moe's", location: [1.0009, 21.009])
     expect(bar.location.to_geo_json).to eq({
-      type: "Point", coordinates: [1.0009, 21.009]
-    })
+                                             type: 'Point', coordinates: [1.0009, 21.009]
+                                           })
   end
 
   it 'should have a to_json method' do
@@ -286,11 +284,35 @@ describe Mongoid::Geospatial::Point do
     # geom.to_geo
 
     describe 'with rgeo' do
+      before do
+        # Ensure RGeo is loaded for this context
+        Mongoid::Geospatial.with_rgeo!
+        # Ensure RGeo::Feature::Point is available for the test
+        raise 'RGeo or RGeo::Feature::Point not loaded' unless defined?(RGeo::Feature::Point)
+      end
+
+      after do
+        # Attempt to clean up RGeo integration to avoid interference with other tests.
+        # This is a simplistic approach; ideally, RGeo tests might be further isolated.
+        # Undefine the to_rgeo method if it was added to Point
+        if Mongoid::Geospatial.const_defined?(:Wrappers) && Mongoid::Geospatial::Wrappers.const_defined?(:Rgeo) && Mongoid::Geospatial::Point.method_defined?(:to_rgeo)
+          Mongoid::Geospatial::Point.send(:remove_method, :to_rgeo)
+        end
+        # Potentially remove other RGeo specific methods if added to other classes
+        # Resetting the factory if it was set by RGeo integration
+        Mongoid::Geospatial.factory = nil
+      end
+
       describe 'instantiated' do
         let(:bar) { Bar.new(name: 'Vitinho', location: [10, 10]) }
 
-        it 'should demongoize to rgeo' do
-          expect(bar.location.class).to eql(Mongoid::Geospatial::Point)
+        it 'should provide a #to_rgeo method returning an RGeo point object' do
+          expect(bar.location).to be_a(Mongoid::Geospatial::Point)
+          expect(bar.location).to respond_to(:to_rgeo)
+          rgeo_point = bar.location.to_rgeo
+          expect(rgeo_point).to be_a(RGeo::Feature::Point)
+          expect(rgeo_point.x).to be_within(0.00001).of(10.0)
+          expect(rgeo_point.y).to be_within(0.00001).of(10.0)
         end
       end
     end

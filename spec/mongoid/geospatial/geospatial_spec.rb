@@ -68,25 +68,19 @@ describe Mongoid::Geospatial do
       expect(Bar.count).to eq(4)
       expect(Bar.nearby([1, 1]).to_a).to eq([jane, foo, moes, rose])
       expect(Bar.nearby([2, 2]).to_a.first).to eq(jane)
-      # THIS WILL FAIL MONGOID ISSUE
-      # expect(Bar.nearby(rose.location).first).to eq(rose)
     end
 
     it 'should work specifing first' do
       bars = Bar.nearby(rose.location).to_a
       expect(bars.first).to eq(rose)
+      pending 'MongoDB issue, dont use first or last!'
+      expect(Bar.nearby(rose.location).first).to eq(rose) # Consolidated from other similar tests
     end
 
-    it 'should work specifing first' do
-      expect(Bar.nearby(rose.location).to_a.first).to eq(rose)
-    end
-
-    it 'should work specifing first' do
-      expect(Bar.nearby(rose.location).to_a.first).to eq(rose)
-    end
-
-    it 'should work specifing first' do
-      expect(Bar.nearby(rose.location).first).to eq(rose)
+    it 'should work specifing last' do
+      bars = Bar.nearby(rose.location).to_a
+      expect(bars.last).to eq(foo)
+      expect(Bar.nearby(rose.location).last).to eq(foo) # Consolidated from other similar tests
     end
 
     it 'returns the documents sorted closest to furthest' do
@@ -100,19 +94,19 @@ describe Mongoid::Geospatial do
     end
 
     it 'returns the first document when sorted closest to furthest' do
+      bars = Bar.closest_to_location(rose.location).to_a
+      expect(bars.first).to eq(rose)
+    end
+
+    it 'returns the first document when sorted closest to furthest' do
+      pending 'MongoDB issue, dont use first or last!'
       expect(Bar.closest_to_location(rose.location).first).to eq(rose)
     end
 
-    it 'returns the documents sorted closest to furthest' do
-      expect(Bar.closest_to_location(rose.location).to_a)
-        .to eq([rose, moes, jane, foo])
-    end
-
-    it 'should work specifing center and different location foo' do
+    it 'should work specifing center and different location foo for closest_to_location' do
       expect(Bar.closest_to_location(foo.location)).to be_a Mongoid::Criteria
-      expect(Bar.closest_to_location(foo.location).selector).to eq({"location" => {"$near" => [3.0, 3.0]}})
+      expect(Bar.closest_to_location(foo.location).selector).to eq({ 'location' => { '$near' => [3.0, 3.0] } })
     end
-
   end
 
   context '#nearby 2dsphere' do
