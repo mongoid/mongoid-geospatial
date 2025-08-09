@@ -6,6 +6,7 @@ module Mongoid
     #
     class Point
       include Enumerable
+
       attr_accessor :x, :y, :z
 
       def initialize(lon, lat, alt = nil)
@@ -34,17 +35,6 @@ module Mongoid
         yield x
         yield y
       end
-
-      #
-      # Point representation as a Hash
-      # Optional param: custom keys.
-      #
-      # @return [Hash] with { lng_key => x, lat_key => y }
-      #
-      def to_hsh(xkey = :x, ykey = :y)
-        { xkey => x, ykey => y }
-      end
-      alias to_hash to_hsh
 
       #
       # Helper for [self, radius]
@@ -86,6 +76,26 @@ module Mongoid
       #
       def to_s
         "#{x}, #{y}"
+      end
+
+      #
+      # Point representation as a Hash
+      # Optional param: custom keys.
+      #
+      # @return [Hash] with { lng_key => x, lat_key => y }
+      #
+      def to_hsh(xkey = :x, ykey = :y)
+        { xkey => x, ykey => y }
+      end
+      alias to_hash to_hsh
+
+      #
+      # Point representation more commonly used
+      # Latitude, Longitude
+      #
+      # @return [Hash] with { latitude: y, longitude: x }
+      def to_lat_lon
+        { latitude: y, longitude: x }
       end
 
       #

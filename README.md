@@ -94,6 +94,12 @@ If you need a hash
 cafe.location.to_hsh   # => { x: -74.026667, y: 40.703056 }
 ```
 
+Commonly used
+
+```ruby
+cafe.location.to_lat_lon   # => { lat: 40.703056, lon: -74.026667 }
+```
+
 If you are using GeoRuby or RGeo
 
 ```ruby
@@ -295,7 +301,7 @@ external library corresponding object.
 
 ### Use RGeo?
 
-https://github.com/dazuma/rgeo
+<https://github.com/dazuma/rgeo>
 
 RGeo is a Ruby wrapper for Proj/GEOS.
 It's perfect when you need to work with complex calculations and projections.
@@ -303,7 +309,7 @@ It'll require more stuff installed to compile/work.
 
 ### Use GeoRuby?
 
-https://github.com/nofxx/georuby
+<https://github.com/nofxx/georuby>
 
 GeoRuby is a pure Ruby Geometry Library.
 It's perfect if you want simple calculations and/or keep your stack in pure ruby.

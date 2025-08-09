@@ -63,6 +63,16 @@ describe Mongoid::Geospatial::Point do
     expect(bar2.location.to_s).to eq('1.0009, 21.009')
   end
 
+  it 'should have a to_lat_lon method that correctly formats points' do
+    bar = Bar.create!(name: "Moe's", location: [1, 2])
+    expect(bar.location.to_lat_lon).to eq({ latitude: 2.0, longitude: 1.0 })
+  end
+
+  it 'should have a customizable to_hsh method that correctly formats points' do
+    bar = Bar.create!(name: "Moe's", location: [1, 2])
+    expect(bar.location.to_hsh(:lon, :lat)).to eq({ lon: 1.0, lat: 2.0 })
+  end
+
   it 'should have a to_geo_json method' do
     bar = Bar.create!(name: "Moe's", location: [1.0009, 21.009])
     expect(bar.location.to_geo_json).to eq({
