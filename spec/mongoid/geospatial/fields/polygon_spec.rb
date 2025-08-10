@@ -40,6 +40,16 @@ describe Mongoid::Geospatial::Polygon do
       expect(geom.radius_sphere(10)[1]).to be_within(0.001).of(0.001569)
     end
 
+    it 'should handle BSON::Documents containing GeoJSON data' do
+      coordinates = [[[1, 1], [1, 2], [1, 1]]]
+
+      document = BSON::Document.new(type: 'Polygon', coordinates: coordinates)
+
+      geom = Mongoid::Geospatial::Polygon.new(document)
+
+      expect([*geom]).to eq(coordinates)
+    end
+
     describe 'with rgeo' do
       before do
         Mongoid::Geospatial.with_rgeo!
