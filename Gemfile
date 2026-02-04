@@ -18,6 +18,8 @@ group :development, :test do
   gem 'reline'
   gem 'rgeo'
   gem 'rubocop'
+  gem 'rubocop-rake'
+  gem 'yard'
 end
 
 group :test do
