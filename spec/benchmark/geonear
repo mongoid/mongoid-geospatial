@@ -11,6 +11,7 @@ Mongoid.load!(File.expand_path('../mongoid.yml', __dir__), :test)
 class Cafe
   include Mongoid::Document
   include Mongoid::Geospatial
+
   field :name
   field :geom, type: Point, spatial: true
   spatial_index :geom
@@ -20,6 +21,7 @@ end
 class Cafe2d
   include Mongoid::Document
   include Mongoid::Geospatial
+
   field :name
   field :geom, type: Point, sphere: true
   spherical_index :geom

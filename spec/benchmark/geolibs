@@ -15,18 +15,21 @@ Mongoid.load!(File.expand_path('mongoid.yml', __dir__), :test)
 
 class NoGeo
   include Mongoid::Document
+
   field :name
 end
 
 class Rider
   include Mongoid::Document
   include Mongoid::Geospatial
+
   field :name
 end
 
 class Cafe
   include Mongoid::Document
   include Mongoid::Geospatial
+
   field :name
   field :spot, type: Point
 end
