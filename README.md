@@ -3,9 +3,8 @@
 A Mongoid Extension that simplifies the use of MongoDB spatial features.
 
 [![Gem Version](https://badge.fury.io/rb/mongoid-geospatial.svg)](http://badge.fury.io/rb/mongoid-geospatial)
+[![Test](https://github.com/mongoid/mongoid-geospatial/actions/workflows/test.yml/badge.svg)](https://github.com/mongoid/mongoid-geospatial/actions/workflows/test.yml)
 [![Code Climate](https://codeclimate.com/github/mongoid/mongoid-geospatial.svg)](https://codeclimate.com/github/mongoid/mongoid-geospatial)
-[![Coverage Status](https://coveralls.io/repos/github/mongoid/mongoid-geospatial/badge.svg?branch=master)](https://coveralls.io/github/mongoid/mongoid-geospatial?branch=master)
-[![Build Status](https://travis-ci.org/mongoid/mongoid-geospatial.svg?branch=master)](https://travis-ci.org/mongoid/mongoid-geospatial)
 
 ## Quick Start
 
