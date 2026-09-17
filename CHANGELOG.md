@@ -5,6 +5,9 @@
 * `Mongoid::Geospatial.near_query` — the selector, when you do not own the model
 * `Point#distance` — haversine in km (or `:m`, `:mi`, `:ft`, `:sm`)
 * `Point#lat` / `#lng`, `geo_near(..., km:)`
+* Fix: `geo_near` read `:km` as radians on a legacy pair — it sends GeoJSON on a sphere now
+* Fix: `geo_near` pinned `spherical` to true whatever the caller asked for
+* Fix: a half-read coordinate (`"nowhere"` mongoizes to `[0.0]`) raises instead of querying
 
 ## 5.1.0 (2018/11/09)
 
