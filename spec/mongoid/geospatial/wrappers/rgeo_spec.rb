@@ -8,11 +8,6 @@ describe 'RGeo Wrapper' do
       Bar.create!(name: "Moe's")
       expect(Bar.count).to eql(1)
     end
-
-    it 'should not respond to distance before loading external' do
-      bar = Bar.create!(location: [5, 5])
-      expect(bar.location).not_to respond_to(:distance)
-    end
   end
 
   describe Mongoid::Geospatial::Polygon do

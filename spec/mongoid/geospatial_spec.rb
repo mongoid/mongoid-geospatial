@@ -183,6 +183,26 @@ describe Mongoid::Geospatial do
       end
     end
 
+    context '#within km' do
+      it 'caps in kilometres' do
+        expect(Alarm.within(lax.spot, 10)).to eq([lax])
+        expect(Alarm.within(lax.spot, 5000)).to eq([lax, jfk])
+      end
+
+      it 'is the same question as nearby(km:)' do
+        expect(Alarm.nearby(lax.spot, km: 10)).to eq([lax])
+      end
+
+      it 'asks $nearSphere even when the field was declared 2d' do
+        Bar.create_indexes
+        expect(Bar.nearby([1, 1], km: 1).selector['location']).to have_key('$nearSphere')
+      end
+
+      it 'chains on a criteria' do
+        expect(Alarm.where(name: 'jfk').within(jfk.spot, 10)).to eq([jfk])
+      end
+    end
+
     #     context ':distance_multiplier' do
     #       it "should multiply returned distance with multiplier" do
     #         Bar.geo_near(lax.location,
@@ -249,6 +269,12 @@ describe Mongoid::Geospatial do
     #
     it 'should return places with distance near a point' do
       expect(@query.first['distance']).to be_zero
+    end
+
+    it 'caps with km, in metres, on the sphere' do
+      names = Bar.geo_near(:location, [10, 20], km: 5).to_a.map { |b| b['name'] }
+      expect(names).to eq(['Bar1'])
+      expect(Bar.geo_near(:location, [10, 20], km: 50).to_a.size).to eq(2)
     end
   end
 end

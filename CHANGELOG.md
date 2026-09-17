@@ -1,6 +1,10 @@
-## 5.1.1 (Next)
+## 7.2.0 (2026/09/17)
 
-* Your contribution here.
+* `Model.within(geom, km)` / `nearby(coords, km:)` — `$nearSphere` capped in kilometres
+* `Mongoid::Geospatial::Geom` / `geom` — the pin (`geom`, 2dsphere); `geom :pick_up` names another
+* `Mongoid::Geospatial.near_query` — the selector, when you do not own the model
+* `Point#distance` — haversine in km (or `:m`, `:mi`, `:ft`, `:sm`)
+* `Point#lat` / `#lng`, `geo_near(..., km:)`
 
 ## 5.1.0 (2018/11/09)
 

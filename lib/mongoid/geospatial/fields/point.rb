@@ -4,10 +4,16 @@ module Mongoid
   module Geospatial
     # Point
     #
-    class Point
+    class Point # rubocop:disable Metrics/ClassLength
       include Enumerable
 
       attr_accessor :x, :y, :z
+      alias lng x
+      alias lon x
+      alias lat y
+      alias lng= x=
+      alias lon= x=
+      alias lat= y=
 
       def initialize(lon, lat, alt = nil)
         @x = lon
@@ -26,6 +32,7 @@ module Mongoid
       end
       alias to_a mongoize
       alias to_xy mongoize
+      alias to_lng_lat mongoize
 
       def [](args)
         mongoize[args]
@@ -123,32 +130,21 @@ module Mongoid
       end
 
       #
-      # Distance calculation methods. Thinking about not using it
-      # One needs to choose and external lib. GeoRuby or RGeo
+      # Crow-flies distance. Haversine, Mongo's earth radius (6371 km).
+      # RGeo/GeoRuby still win for projections; this is ETA and "how far".
       #
-      # Return the distance between the 2D points (ie taking care
-      # only of the x and y coordinates), assuming the points are
-      # in projected coordinates. Euclidian distance in whatever
-      # unit the x and y ordinates are.
-      # def euclidian_distance(point)
-      #   Math.sqrt((point.x - x)**2 + (point.y - y)**2)
-      # end
+      def distance(other, unit = :km) # rubocop:disable Metrics/AbcSize
+        xy = other.is_a?(Point) ? [other.x, other.y] : self.class.mongoize(other)
+        raise ArgumentError, "Invalid point: #{other.inspect}" unless xy
 
-      # # Spherical distance in meters, using 'Haversine' formula.
-      # # with a radius of 6471000m
-      # # Assumes x is the lon and y the lat, in degrees (Changed
-      # in version 1.1).
-      # # The user has to make sure using this distance makes sense
-      # (ie she should be in latlon coordinates)
-      # def spherical_distance(point,r=6370997.0)
-      #   dlat = (point.lat - lat) * DEG2RAD / 2
-      #   dlon = (point.lon - lon) * DEG2RAD / 2
-
-      #   a = Math.sin(dlat)**2 + Math.cos(lat * DEG2RAD) *
-      #         Math.cos(point.lat * DEG2RAD) * Math.sin(dlon)**2
-      #   c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
-      #   r * c
-      # end
+        dlat = (xy[1] - y) * RAD_PER_DEG
+        dlon = (xy[0] - x) * RAD_PER_DEG
+        a = (Math.sin(dlat / 2)**2) +
+            (Math.cos(y * RAD_PER_DEG) * Math.cos(xy[1] * RAD_PER_DEG) *
+             (Math.sin(dlon / 2)**2))
+        c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+        Mongoid::Geospatial.earth_radius[unit] * c
+      end
 
       class << self
         #

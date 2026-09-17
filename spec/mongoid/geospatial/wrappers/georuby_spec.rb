@@ -8,11 +8,6 @@ describe Mongoid::Geospatial::Point do
     expect(Place.count).to eql(1)
   end
 
-  it 'should not respond to distance before loading external gem' do
-    bar = Place.create!(location: [5, 5])
-    expect(bar.location).not_to respond_to(:distance)
-  end
-
   describe 'queryable' do
     before do
       Mongoid::Geospatial.with_georuby!

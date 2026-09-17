@@ -154,6 +154,18 @@ describe Mongoid::Geospatial::Point do
       expect(bar.location.radius_sphere(1, :mi)[1])
         .to be_within(0.0001).of(0.00025)
     end
+
+    it 'answers lat/lng as y/x' do
+      expect([bar.location.lng, bar.location.lat]).to eq([3.0, 2.0])
+    end
+
+    it 'walks crow-flies km (JFK–LAX)' do
+      jfk = described_class.new(-73.7781, 40.6413)
+      lax = described_class.new(-118.4085, 33.9416)
+      expect(jfk.distance(lax)).to be_within(30).of(3974)
+      expect(jfk.distance(lax, :mi)).to be_within(20).of(2470)
+      expect(jfk.distance([-118.4085, 33.9416])).to be_within(30).of(3974)
+    end
   end
 
   describe 'queryable' do

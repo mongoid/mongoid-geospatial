@@ -5,6 +5,7 @@ require 'active_support/concern' # Explicitly require for `extend ActiveSupport:
 require 'mongoid/geospatial/helpers/spatial'
 require 'mongoid/geospatial/helpers/sphere'
 require 'mongoid/geospatial/helpers/delegate'
+require 'mongoid/geospatial/helpers/geom'
 
 module Mongoid
   #
@@ -69,6 +70,27 @@ module Mongoid
       require 'mongoid/geospatial/wrappers/georuby'
     end
 
+    #
+    # A [lng, lat] pair, or nothing. `Point.mongoize` is lenient — it reads
+    # "nowhere" as [0.0] — and a half pair is a query Mongo cannot answer.
+    #
+    def self.mongoize_point!(geom)
+      coords = Point.mongoize(geom)
+      unless coords.is_a?(Array) && coords.size == 2 && coords.all?(Numeric)
+        raise ArgumentError, "Invalid coordinates: #{geom.inspect}"
+      end
+
+      coords
+    end
+
+    #
+    # Selector for `$nearSphere` with a km cap. Metres on the wire.
+    #
+    def self.near_query(geom, km) # rubocop:disable Naming/MethodParameterName
+      { '$geometry' => { 'type' => 'Point', 'coordinates' => mongoize_point!(geom) },
+        '$maxDistance' => km * 1_000 }
+    end
+
     # Methods applied to Document's class
     module ClassMethods
       #
@@ -91,6 +113,14 @@ module Mongoid
       def spherical_index(name, options = {})
         spatial_fields_indexed << name
         index({ name => '2dsphere' }, options)
+      end
+      alias sphere_index spherical_index
+
+      #
+      # A Point on a 2dsphere index. Default name is `geom`.
+      #
+      def geom(name = :geom)
+        field name, type: Point, sphere: true
       end
 
       #
@@ -201,15 +231,15 @@ module Mongoid
       #
       # @param coordinates [Array, Mongoid::Geospatial::Point] The coordinates (e.g., [lon, lat])
       #   or a Point object to find documents near to.
-      # @param _options [Hash] Optional hash for future extensions (currently unused).
+      # @param km [Numeric, nil] Optional cap in kilometres (`$maxDistance` in metres).
       #
       # @return [Mongoid::Criteria] A criteria object for the query.
       #
       # Example:
       #   Bar.nearby([10, 20])
-      #   Alarm.nearby(my_point_object)
+      #   Alarm.nearby(my_point_object, km: 30)
       #
-      def nearby(coordinates, _options = {})
+      def nearby(coordinates, km: nil, **_opts) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Naming/MethodParameterName
         if spatial_fields.empty?
           raise "No spatial fields defined for #{name} to use with .nearby. " \
                 "Mark a field with 'spatial: true' or 'sphere: true'."
@@ -220,9 +250,22 @@ module Mongoid
 
         raise "Could not find field definition for spatial field: #{field_name_sym}" unless field_definition
 
-        query_operator = field_definition.options[:sphere] ? :near_sphere : :near
+        if km
+          # GeoJSON `$maxDistance` is metres. `$near` on a 2d index is radians.
+          query = Mongoid::Geospatial.near_query(coordinates, km)
+          criteria.where(field_name_sym.near_sphere => query)
+        else
+          query_operator = field_definition.options[:sphere] ? :near_sphere : :near
+          criteria.where(field_name_sym.send(query_operator) => coordinates)
+        end
+      end
 
-        criteria.where(field_name_sym.send(query_operator) => coordinates)
+      #
+      # Documents within +km+ of +geom+, nearest first.
+      # `$nearSphere` + `$maxDistance` in metres.
+      #
+      def within(geom, km) # rubocop:disable Naming/MethodParameterName
+        nearby(geom, km: km)
       end
 
       # Performs a $geoNear aggregation pipeline stage to find documents near a point,
@@ -274,13 +317,19 @@ module Mongoid
       #   end
       #
       def geo_near(field_name, coordinates, options = {})
-        mongoized_coords = Mongoid::Geospatial::Point.mongoize(coordinates)
-
-        raise ArgumentError, "Invalid coordinates provided: #{coordinates.inspect}" unless mongoized_coords
+        mongoized_coords = Mongoid::Geospatial.mongoize_point!(coordinates)
 
         # User-provided options. Work with a copy.
         user_options = options.dup
         limit_value = user_options.delete(:limit) # Handled by a separate pipeline stage
+
+        # `km:` is metres on the wire, and metres only holds for a GeoJSON
+        # `near` on a sphere. A legacy pair would read `maxDistance` in radians.
+        if (km = user_options.delete(:km))
+          user_options[:maxDistance] = km.to_f * 1_000
+          user_options[:spherical] = true
+          mongoized_coords = { 'type' => 'Point', 'coordinates' => mongoized_coords }
+        end
 
         # Core $geoNear parameters derived from method arguments, these are not overrideable by user_options.
         geo_near_core_params = {
@@ -297,10 +346,8 @@ module Mongoid
         # Merge user options over defaults, then ensure core parameters are set.
         geo_near_stage_options = geo_near_defaultable_params.merge(user_options).merge(geo_near_core_params)
 
-        # Ensure :spherical is a strict boolean (true/false).
-        # If user_options provided :spherical, it's already set. If not, the default is used.
-        # This line ensures the final value is strictly true or false, not just truthy/falsy.
-        geo_near_stage_options[:spherical] = !geo_near_stage_options[:spherical].nil?
+        # $geoNear wants a strict boolean, and honours the caller's choice.
+        geo_near_stage_options[:spherical] = geo_near_stage_options[:spherical] ? true : false
 
         # Note on performance:
         # $geoNear is an aggregation pipeline stage. For simple proximity queries,

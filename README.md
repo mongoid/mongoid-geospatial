@@ -46,6 +46,14 @@ class Place
 end
 ```
 
+A pin named `geom` on a 2dsphere index is one include:
+
+```ruby
+include Mongoid::Geospatial::Geom   # field :geom, type: Point, sphere: true
+# or a named one:
+geom :pick_up
+```
+
 Generate indexes on MongoDB via rake:
 
 ```
@@ -98,6 +106,9 @@ Commonly used
 
 ```ruby
 cafe.location.to_lat_lon   # => { lat: 40.703056, lon: -74.026667 }
+cafe.location.lat          # => 40.703056
+cafe.location.lng          # => -74.026667
+cafe.location.distance(other) # => km, haversine
 ```
 
 If you are using GeoRuby or RGeo
@@ -114,7 +125,7 @@ This lib uses #x and #y everywhere.
 It's shorter than lat or lng or another variation that also confuses.
 A point is a 2D mathematical notation, longitude/latitude is when you use that notation to map an sphere. In other words: all longitudes are 'xs' where not all 'xs' are longitudes.
 
-Distance and other geometrical calculations are delegated to the external library of your choice. More info about using RGeo or GeoRuby below. Some built in helpers for mongoid queries:
+Distance is `Point#distance` (haversine, km). Projections and heavier geometry still go to RGeo or GeoRuby. Some built in helpers for mongoid queries:
 
 ```ruby
 # Returns middle point + radius
@@ -221,7 +232,16 @@ Bar.near_sphere(location: person.house)
 Bar.where(:location.near_sphere => person.house)
 ```
 
-### nearby
+### nearby / within
+
+```ruby
+Bar.nearby(person.house)
+Bar.nearby(person.house, km: 30)
+Bar.within(person.house, 30)          # same question, km required
+City.where(:geom.near_sphere => Mongoid::Geospatial.near_query(geom, 50))
+```
+
+`within` is `$nearSphere` + `$maxDistance` in metres. Nearest first, chainable.
 
 You can add a `spatial_scope` on your models. So you can query:
 
