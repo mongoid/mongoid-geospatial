@@ -51,28 +51,23 @@ describe Mongoid::Geospatial do
       Bar.create!(name: 'Foo', location: [3, 3])
     end
 
-    it 'should work specifing center and different location foo' do
+    it 'builds the same $near selector as its spatial_scope' do
       expect(Bar.nearby(foo.location)).to be_a Mongoid::Criteria
-      expect(Bar.nearby(foo.location).selector).to eq({ 'location' => { '$near' => [3.0, 3.0] } })
+      expect(Bar.nearby(foo.location).selector)
+        .to eq({ 'location' => { '$near' => [3.0, 3.0] } })
+      expect(Bar.closest_to_location(foo.location).selector)
+        .to eq(Bar.nearby(foo.location).selector)
     end
 
-    it 'should work specifing center and different location moes' do
-      expect(Bar.nearby(moes.location).limit(2)).to eq([moes, rose])
-    end
-
-    it 'should work finding first' do
-      expect(Bar.nearby(moes.location).first).to eq(moes)
-    end
-
-    it 'really should work find first nearby' do
-      expect(Bar.count).to eq(4)
+    it 'orders every document by distance from the point given' do
       expect(Bar.nearby([1, 1]).to_a).to eq([jane, foo, moes, rose])
-      expect(Bar.nearby([2, 2]).to_a.first).to eq(jane)
+      expect(Bar.nearby(rose.location).to_a).to eq([rose, moes, jane, foo])
+      expect(Bar.closest_to_location(rose.location).to_a).to eq([rose, moes, jane, foo])
     end
 
-    it 'should work specifing first' do
-      bars = Bar.nearby(rose.location).to_a
-      expect(bars.first).to eq(rose)
+    it 'keeps that order under limit' do
+      expect(Bar.nearby(moes.location).limit(2)).to eq([moes, rose])
+      expect(Bar.closest_to_location(rose.location).limit(2)).to eq([rose, moes])
     end
 
     # Not a MongoDB issue: Mongoid's #first and #last sort by _id when the
@@ -80,36 +75,14 @@ describe Mongoid::Geospatial do
     # { _id: 1 }`), and that _id sort replaces the distance order $near put
     # there. Walk the criteria — `.to_a.first` — or ask $geoNear, which
     # returns the distance as a field you can sort on.
+    #
+    # It reads as working whenever the nearest document happens to be the
+    # oldest: `nearby(moes.location).first` is Moe's either way. Rosa is the
+    # example that tells the truth.
     it 'loses the $near order to #first and #last — read the criteria instead' do
       expect(Bar.nearby(rose.location).to_a.first).to eq(rose)
       expect(Bar.nearby(rose.location).first).to eq(Bar.asc(:_id).first)
       expect(Bar.nearby(rose.location).last).to eq(Bar.desc(:_id).first)
-    end
-
-    it 'should work specifing last' do
-      bars = Bar.nearby(rose.location).to_a
-      expect(bars.last).to eq(foo)
-      expect(Bar.nearby(rose.location).last).to eq(foo) # Consolidated from other similar tests
-    end
-
-    it 'returns the documents sorted closest to furthest' do
-      expect(Bar.closest_to_location(rose.location).to_a)
-        .to eq([rose, moes, jane, foo])
-    end
-
-    it 'returns the documents sorted closest to furthest with limit' do
-      expect(Bar.closest_to_location(rose.location).limit(2))
-        .to eq([rose, moes])
-    end
-
-    it 'returns the first document when sorted closest to furthest' do
-      bars = Bar.closest_to_location(rose.location).to_a
-      expect(bars.first).to eq(rose)
-    end
-
-    it 'should work specifing center and different location foo for closest_to_location' do
-      expect(Bar.closest_to_location(foo.location)).to be_a Mongoid::Criteria
-      expect(Bar.closest_to_location(foo.location).selector).to eq({ 'location' => { '$near' => [3.0, 3.0] } })
     end
   end
 
@@ -128,21 +101,14 @@ describe Mongoid::Geospatial do
       Alarm.create(name: 'lax', spot: [-118.40, 33.94])
     end
 
-    it 'should work with specific center and different spot attribute' do
+    it 'answers the same through nearby, the macro and the symbol key' do
       expect(Alarm.nearby(lax.spot)).to eq([lax, jfk])
-    end
-
-    it 'should work with default origin' do
       expect(Alarm.near_sphere(spot: lax.spot)).to eq([lax, jfk])
-    end
-
-    it 'should work with default origin key' do
       expect(Alarm.where(:spot.near_sphere => lax.spot)).to eq([lax, jfk])
     end
 
     context ':paginate' do
       before do
-        Alarm.create_indexes
         50.times do
           Alarm.create(spot: [rand(1..10), rand(1..10)])
         end
@@ -167,7 +133,6 @@ describe Mongoid::Geospatial do
 
     context ':query' do
       before do
-        Alarm.create_indexes
         3.times do
           Alarm.create(spot: [jfk.spot.x + rand(0), jfk.spot.y + rand(0)])
         end
