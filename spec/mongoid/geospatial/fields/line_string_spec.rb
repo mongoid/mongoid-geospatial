@@ -40,12 +40,6 @@ describe Mongoid::Geospatial::LineString do
       expect(River.first.course).to eq([[1, 1], [9, 9]])
     end
 
-    it 'should have same obj id' do
-      pending 'Mongoid Issue #...'
-      river = River.create!(name: 'Amazonas', course: [[1, 1], [9, 9]])
-      expect(river.course.object_id).to eq(river.course.object_id)
-    end
-
     it 'should have same obj id ary' do
       river = River.create!(name: 'Amazonas', mouth_array: [[1, 1], [9, 9]])
       expect(river.mouth_array.object_id).to eq(river.mouth_array.object_id)

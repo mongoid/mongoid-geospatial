@@ -6,6 +6,7 @@ require 'mongoid/geospatial/helpers/spatial'
 require 'mongoid/geospatial/helpers/sphere'
 require 'mongoid/geospatial/helpers/delegate'
 require 'mongoid/geospatial/helpers/geom'
+require 'mongoid/geospatial/keys'
 
 module Mongoid
   #

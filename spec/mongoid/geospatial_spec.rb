@@ -73,8 +73,17 @@ describe Mongoid::Geospatial do
     it 'should work specifing first' do
       bars = Bar.nearby(rose.location).to_a
       expect(bars.first).to eq(rose)
-      pending 'MongoDB issue, dont use first or last!'
-      expect(Bar.nearby(rose.location).first).to eq(rose) # Consolidated from other similar tests
+    end
+
+    # Not a MongoDB issue: Mongoid's #first and #last sort by _id when the
+    # criteria carries no sort of its own (contextual/mongo.rb, `view.sort ||
+    # { _id: 1 }`), and that _id sort replaces the distance order $near put
+    # there. Walk the criteria — `.to_a.first` — or ask $geoNear, which
+    # returns the distance as a field you can sort on.
+    it 'loses the $near order to #first and #last — read the criteria instead' do
+      expect(Bar.nearby(rose.location).to_a.first).to eq(rose)
+      expect(Bar.nearby(rose.location).first).to eq(Bar.asc(:_id).first)
+      expect(Bar.nearby(rose.location).last).to eq(Bar.desc(:_id).first)
     end
 
     it 'should work specifing last' do
@@ -96,11 +105,6 @@ describe Mongoid::Geospatial do
     it 'returns the first document when sorted closest to furthest' do
       bars = Bar.closest_to_location(rose.location).to_a
       expect(bars.first).to eq(rose)
-    end
-
-    it 'returns the first document when sorted closest to furthest' do
-      pending 'MongoDB issue, dont use first or last!'
-      expect(Bar.closest_to_location(rose.location).first).to eq(rose)
     end
 
     it 'should work specifing center and different location foo for closest_to_location' do

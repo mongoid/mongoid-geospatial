@@ -244,22 +244,26 @@ describe Mongoid::Geospatial::Point do
         Person.new(location: [-73.98, 40.75])
       end
 
-      it 'returns the documents within a circle' do
-        pending 'Test for standard Mongoid/MongoDB $within behavior with $center operator'
-        l = [elvis.location, 500.0 / Mongoid::Geospatial::EARTH_RADIUS_KM]
-        expect(Bar.where(:location.within_circle => l).to_a).to include(mile3)
-      end
-
-      it 'returns the documents within a spherical circle' do
-        pending 'Test for standard Mongoid/MongoDB $within behavior with $centerSphere operator'
+      # mile1 is 1.8km out, mile3 4.46km, mile7 10.43km, mile9 19.85km.
+      it 'returns the documents within a spherical circle, radius in km' do
         expect(Bar.where(:location.within_spherical_circle =>
-                         [elvis.location, 0.0005]).to_a).to eq([mile1])
+                         elvis.location.radius_sphere(5, :km)).to_a)
+          .to match_array([mile1, mile3])
       end
 
-      it 'returns the documents within a center circle' do
-        pending 'Test for standard Mongoid/MongoDB $within behavior with $center operator (legacy)'
-        expect(Bar.where(:location.within_center_circle =>
-                         [elvis.location, 0.0005]).to_a).to eq([mile1])
+      it 'draws the circle Point#distance measures' do
+        expect(Bar.where(:location.within_spherical_circle =>
+                         elvis.location.radius_sphere(2, :km)).to_a).to eq([mile1])
+        expect(elvis.location.distance(mile1.location)).to be < 2
+        expect(elvis.location.distance(mile3.location)).to be > 2
+      end
+
+      # `$center` reads degrees, not km — a flat circle on a legacy pair.
+      it 'returns the documents within a circle' do
+        expect(Bar.where(:location.within_circle => elvis.location.radius(0.05)).to_a)
+          .to eq([mile1])
+        expect(Bar.where(:location.within_circle => elvis.location.radius(0.2)).to_a)
+          .to match_array([mile1, mile3, mile7, mile9])
       end
 
       it 'returns the documents within a box' do

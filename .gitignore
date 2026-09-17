@@ -1,5 +1,7 @@
 .vscode
 Gemfile.lock
+*.gem
+
 # rcov generated
 coverage
 

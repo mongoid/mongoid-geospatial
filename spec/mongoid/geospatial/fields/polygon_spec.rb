@@ -95,16 +95,14 @@ describe Mongoid::Geospatial::Polygon do
         expect(query.to_a).to eq([farm])
       end
 
-      it 'returns the documents within a circle (standard Mongoid query)' do
-        pending 'Test for standard Mongoid/MongoDB $within behavior with $center operator (Moped legacy)'
-        expect(Farm.where(:geom.within_circle =>
-                           [ranch.geom, 0.4]).first).to eq(ranch)
+      it 'returns the documents within a circle' do
+        expect(Farm.where(:geom.within_circle => [ranch.geom, 0.4]).to_a).to eq([ranch])
       end
 
-      it 'returns the documents within a spherical circle (standard Mongoid query)' do
-        pending 'Test for standard Mongoid/MongoDB $within behavior with $centerSphere operator (Moped legacy)'
+      it 'returns the documents within a spherical circle' do
+        expect(Farm.where(:geom.within_spherical_circle => [ranch.geom, 0.1]).to_a).to eq([ranch])
         expect(Farm.where(:geom.within_spherical_circle =>
-                           [ranch.geom, 0.1]).first).to eq(ranch)
+                           ranch.geom.radius_sphere(50, :km)).to_a).to eq([ranch])
       end
     end
   end

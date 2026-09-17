@@ -243,6 +243,11 @@ City.where(:geom.near_sphere => Mongoid::Geospatial.near_query(geom, 50))
 
 `within` is `$nearSphere` + `$maxDistance` in metres. Nearest first, chainable.
 
+**Don't call `#first` or `#last` on a `$near` criteria.** Mongoid sorts by
+`_id` when a criteria carries no sort of its own, and that replaces the
+distance order Mongo put there. Walk the criteria instead — `.to_a.first` —
+or use `geo_near`, which returns the distance as a field you can sort on.
+
 You can add a `spatial_scope` on your models. So you can query:
 
 ```ruby
@@ -307,6 +312,20 @@ Bar.within_polygon(location: [[[x,y],...[x,y]]])
 # or with a bbox
 Bar.within_polygon(location: street.bbox)
 ```
+
+- within_circle / within_spherical_circle
+
+Mongoid ships `within_polygon` and `within_box` and stopped there; this gem
+registers the two circle shapes, which is what `radius` and `radius_sphere`
+have been building arguments for all along.
+
+```ruby
+Bar.where(:location.within_spherical_circle => cafe.location.radius_sphere(5, :km))
+Bar.where(:location.within_circle => cafe.location.radius(0.05))  # degrees, flat
+```
+
+`$centerSphere` reads radians (`radius_sphere` hands it those); `$center`
+reads the coordinate system's own units — degrees on a legacy pair.
 
 - intersects_line
 - intersects_point

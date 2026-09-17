@@ -7,6 +7,7 @@
 * `Point#lat` / `#lng`, `geo_near(..., km:)`
 * Fix: `geo_near` read `:km` as radians on a legacy pair — it sends GeoJSON on a sphere now
 * Fix: `geo_near` pinned `spherical` to true whatever the caller asked for
+* `:field.within_circle` / `:field.within_spherical_circle` — the `$geoWithin` circles Mongoid dropped
 * Fix: a half-read coordinate (`"nowhere"` mongoizes to `[0.0]`) raises instead of querying
 
 ## 5.1.0 (2018/11/09)
