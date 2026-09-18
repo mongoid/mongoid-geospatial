@@ -6,37 +6,37 @@ describe Mongoid::Geospatial::Point do
   describe "Moe's Bar" do
     let(:bar) { Bar.create!(name: "Moe's") }
 
-    it 'should not interfer with mongoid' do
+    it 'does not interfere with mongoid' do
       expect(bar.class.count).to eql(1)
     end
 
-    it 'should not fail if point is nil' do
+    it 'does not fail if point is nil' do
       expect(bar.location).to be_nil
     end
 
-    it 'should set point methodically' do
+    it 'sets point methodically' do
       bar.location = Mongoid::Geospatial::Point.new(8, 9)
       expect(bar.save).to be_truthy
       expect(Bar.first.location.x).to eq(8)
       expect(Bar.first.location.y).to eq(9)
     end
 
-    it 'should set point with comma separated text' do
+    it 'sets point with comma separated text' do
       bar.location = '2.99,3.99'
       expect(bar.location.mongoize).to eq([2.99, 3.99])
     end
 
-    it 'should set point with space separated text' do
+    it 'sets point with space separated text' do
       bar.location = '2.99 3.99'
       expect(bar.location.mongoize).to eq([2.99, 3.99])
     end
 
-    it 'should set point with space comma separated text' do
+    it 'sets point with space comma separated text' do
       bar.location = '2.99 ,  3.99'
       expect(bar.location.mongoize).to eq([2.99, 3.99])
     end
 
-    it 'should set point from hash' do
+    it 'sets point from hash' do
       bar.location = { latitude: 2.99, longitude: 3.99 }
       expect(bar.location.mongoize).to eq([3.99, 2.99])
     end
@@ -48,14 +48,14 @@ describe Mongoid::Geospatial::Point do
           config.point.y = Mongoid::Geospatial.lng_symbols
         end
       end
-      it 'should set point from hash' do
+      it 'reads that same hash the other way round' do
         bar.location = { latitude: 2.99, longitude: 3.99 }
         expect(bar.location.mongoize).to eq([2.99, 3.99])
       end
     end
   end
 
-  it 'should have a to_s method that correctly formats points' do
+  it 'has a to_s method that correctly formats points' do
     bar1 = Bar.create!(name: "Moe's", location: [1, 2])
     expect(bar1.location.to_s).to eq('1.0, 2.0')
 
@@ -63,34 +63,34 @@ describe Mongoid::Geospatial::Point do
     expect(bar2.location.to_s).to eq('1.0009, 21.009')
   end
 
-  it 'should have a to_lat_lon method that correctly formats points' do
+  it 'has a to_lat_lon method that correctly formats points' do
     bar = Bar.create!(name: "Moe's", location: [1, 2])
     expect(bar.location.to_lat_lon).to eq({ latitude: 2.0, longitude: 1.0 })
   end
 
-  it 'should have a customizable to_hsh method that correctly formats points' do
+  it 'has a customizable to_hsh method that correctly formats points' do
     bar = Bar.create!(name: "Moe's", location: [1, 2])
     expect(bar.location.to_hsh(:lon, :lat)).to eq({ lon: 1.0, lat: 2.0 })
   end
 
-  it 'should have a to_geo_json method' do
+  it 'has a to_geo_json method' do
     bar = Bar.create!(name: "Moe's", location: [1.0009, 21.009])
     expect(bar.location.to_geo_json).to eq({
                                              type: 'Point', coordinates: [1.0009, 21.009]
                                            })
   end
 
-  it 'should have a to_json method' do
+  it 'has a to_json method' do
     bar = Bar.create!(name: "Moe's", location: [1.0009, 21.009])
     expect(bar.location.to_json).to eq('[1.0009,21.009]')
   end
 
-  it 'should have #reverse to get lat, lon' do
+  it 'has #reverse to get lat, lon' do
     bar = Bar.create!(name: "Moe's", location: [1, 2])
     expect(bar.location.reverse).to eq([2, 1])
   end
 
-  it 'should set point to nil' do
+  it 'sets point to nil' do
     bar = Bar.create!(name: "Moe's", location: [1, 1])
     bar.location = nil
     expect(bar.location).to be_nil
@@ -98,14 +98,14 @@ describe Mongoid::Geospatial::Point do
     expect(Bar.where(location: nil).first).to eq(bar)
   end
 
-  it 'should update point x' do
+  it 'updates point x' do
     bar = Bar.create!(name: "Moe's", location: [1, 1])
     bar.location = [2, 3]
     expect(bar.save).to be_truthy
     expect(Bar.first.location.to_a).to eq([2, 3])
   end
 
-  it 'should set point empty string to nil' do
+  it 'sets point empty string to nil' do
     bar = Bar.create!(name: "Moe's", location: [1, 1])
     bar.location = ''
     expect(bar.location).to be_nil
@@ -113,7 +113,7 @@ describe Mongoid::Geospatial::Point do
     expect(Bar.where(location: nil).first).to eq(bar)
   end
 
-  it 'should set point empty array to nil' do
+  it 'sets point empty array to nil' do
     bar = Bar.create!(name: "Moe's", location: [1, 1])
     bar.location = []
     expect(bar.location).to be_nil
@@ -124,33 +124,33 @@ describe Mongoid::Geospatial::Point do
   describe 'methods' do
     let(:bar) { Bar.create!(location: [3, 2]) }
 
-    it 'should have a .to_a' do
+    it 'has a .to_a' do
       expect(bar.location.to_a[0..1]).to eq([3.0, 2.0])
     end
 
-    it 'should have an array [] accessor' do
+    it 'has an array [] accessor' do
       expect(bar.location[0]).to eq(3.0)
     end
 
-    it 'should have an ActiveModel symbol accessor' do
+    it 'has an ActiveModel symbol accessor' do
       expect(bar[:location].to_a).to eq([3, 2])
     end
 
-    it 'should have a radius helper' do
+    it 'has a radius helper' do
       expect(bar.location.radius).to eql([[3.0, 2.0], 1])
     end
 
-    it 'should have a radius sphere helper' do
+    it 'has a radius sphere helper' do
       expect(bar.location.radius_sphere[1])
         .to be_within(0.0001).of(0.00015)
     end
 
-    it 'should have a radius sphere helper in meters' do
+    it 'has a radius sphere helper in meters' do
       expect(bar.location.radius_sphere(1000, :m)[1])
         .to be_within(0.0001).of(0.00015)
     end
 
-    it 'should have a radius sphere helper in miles' do
+    it 'has a radius sphere helper in miles' do
       expect(bar.location.radius_sphere(1, :mi)[1])
         .to be_within(0.0001).of(0.00025)
     end
@@ -278,28 +278,28 @@ describe Mongoid::Geospatial::Point do
   end
 
   describe '(de)mongoize' do
-    it 'should mongoize array' do
+    it 'mongoizes array' do
       bar = Bar.new(location: [10, -9])
       expect(bar.location.class).to eql(Mongoid::Geospatial::Point)
       expect(bar.location.x).to be_within(0.1).of(10)
       expect(bar.location.y).to be_within(0.1).of(-9)
     end
 
-    it 'should mongoize hash' do
+    it 'mongoizes hash' do
       geom = Bar.new(location: { x: 10, y: -9 }).location
       expect(geom.class).to eql(Mongoid::Geospatial::Point)
       expect(geom.x).to be_within(0.1).of(10)
       expect(geom.y).to be_within(0.1).of(-9)
     end
 
-    it 'should mongoize hash with symbols in any order' do
+    it 'mongoizes hash with symbols in any order' do
       geom = Bar.new(location: { y: -9, x: 10 }).location
       expect(geom.class).to eql(Mongoid::Geospatial::Point)
       expect(geom.x).to be_within(0.1).of(10)
       expect(geom.y).to be_within(0.1).of(-9)
     end
 
-    it 'should mongoize hash with string keys in any order' do
+    it 'mongoizes hash with string keys in any order' do
       geom = Bar.new(location: { 'y' => -9, 'x' => 10 }).location
       expect(geom.class).to eql(Mongoid::Geospatial::Point)
       expect(geom.x).to be_within(0.1).of(10)
@@ -342,7 +342,7 @@ describe Mongoid::Geospatial::Point do
       describe 'instantiated' do
         let(:bar) { Bar.new(name: 'Vitinho', location: [10, 10]) }
 
-        it 'should provide a #to_rgeo method returning an RGeo point object' do
+        it 'provides a #to_rgeo method returning an RGeo point object' do
           expect(bar.location).to be_a(Mongoid::Geospatial::Point)
           expect(bar.location).to respond_to(:to_rgeo)
           rgeo_point = bar.location.to_rgeo

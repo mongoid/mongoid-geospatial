@@ -8,11 +8,11 @@ describe Mongoid::Fields do
       Bar.create_indexes
     end
 
-    it 'should created indexes' do
+    it 'creates indexes' do
       expect(Bar.collection.indexes.get(location: '2d')).not_to be_nil
     end
 
-    it 'should create correct indexes' do
+    it 'creates correct indexes' do
       expect(Bar.collection.indexes.get(location: '2d'))
         .to eq('background' => false,
                'key' => { 'location' => '2d' },
@@ -20,7 +20,7 @@ describe Mongoid::Fields do
                'v' => 2)
     end
 
-    it 'should set spatial fields' do
+    it 'sets spatial fields' do
       expect(Bar.spatial_fields).to eql([:location])
     end
 
@@ -30,7 +30,7 @@ describe Mongoid::Fields do
       expect(Bar.spatial_fields_indexed).to eql([:location])
     end
 
-    it 'should set some class methods' do
+    it 'sets some class methods' do
       far  = Bar.create!(name: 'Far', location: [7, 7])
       near = Bar.create!(name: 'Near', location: [2, 2])
       expect(Bar.nearby([1, 1])).to eq([near, far])
@@ -40,7 +40,7 @@ describe Mongoid::Fields do
     # The generic `nearby` method is also tested above.
     # This commented test seems to be for an older/alternative scope naming,
     # so it will be removed.
-    # # it "should set some class methods" do
+    # # it "sets some class methods" do
     # #   far  = Bar.create!(name: "Far", location: [7,7])
     # #   near = Bar.create!(name: "Near", location: [2,2])
     # #   Bar.near_location([1,1]).should eq([near, far])

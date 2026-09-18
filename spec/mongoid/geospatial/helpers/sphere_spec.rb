@@ -8,11 +8,11 @@ describe Mongoid::Fields do
       Alarm.create_indexes
     end
 
-    it 'should created indexes' do
+    it 'creates indexes' do
       expect(Alarm.collection.indexes.get(spot: '2dsphere')).not_to be_nil
     end
 
-    it 'should create correct indexes' do
+    it 'creates correct indexes' do
       expect(Alarm.collection.indexes.get(spot: '2dsphere'))
         .to include('2dsphereIndexVersion' => 3,
                     'background' => false,
@@ -21,7 +21,7 @@ describe Mongoid::Fields do
                     'v' => 2)
     end
 
-    it 'should set spatial fields' do
+    it 'sets spatial fields' do
       expect(Alarm.spatial_fields).to eql([:spot])
     end
 
@@ -29,7 +29,7 @@ describe Mongoid::Fields do
       expect(Alarm.spatial_fields_indexed).to eql([:spot])
     end
 
-    it 'should correctly instantiate the field type when a spherical index is defined' do
+    it 'correctly instantiate the field type when a spherical index is defined' do
       far = Alarm.create!(name: 'Far', spot: [7, 7])
       expect(far.spot).to be_instance_of(Mongoid::Geospatial::Point)
     end

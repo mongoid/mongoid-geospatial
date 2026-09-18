@@ -34,6 +34,13 @@ RSpec.configure do |config|
     Mongoid.purge!
     Mongoid::Geospatial::Config.reset!
   end
+
+  # `with_rgeo!` / `with_georuby!` are a plain `require`: once any example
+  # calls one, that wrapper is wired in for the rest of the run. File order
+  # hid a spec that read #to_geo without asking for it. Random keeps it honest
+  # — the seed is on the last line of every run if one ever goes red.
+  config.order = :random
+  Kernel.srand config.seed
 end
 
 puts "Running with Mongoid v#{Mongoid::VERSION}"

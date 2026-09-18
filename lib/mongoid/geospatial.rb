@@ -344,12 +344,13 @@ module Mongoid
       #     For spherical queries, specify distance in meters. For 2d queries, in the same units as coordinates.
       #   - `:minDistance` [Numeric] The minimum distance. (MongoDB 2.6+)
       #   - `:query` [Hash] Limits the results to the documents that match the query.
-      #   - `:limit` [Integer] The maximum number of documents to return (applied as a separate `$limit` pipeline stage).
-      #   - `:distanceMultiplier` [Numeric] A factor to multiply all distances returned by the query.
-      #   - `:includeLocs` [String] Specifies the name of the output field that identifies the location used to calculate the distance.
-      #     This is useful when the queried field contains multiple locations (e.g., an array of points) or complex GeoJSON
-      #     geometries (e.g., a Polygon), as it shows which specific point was used for the distance calculation.
-      #     Example: `includeLocs: 'matchedPoint'` would add a `matchedPoint` field to each output document.
+      #   - `:limit` [Integer] The maximum number of documents to return
+      #     (applied as a separate `$limit` pipeline stage).
+      #   - `:distanceMultiplier` [Numeric] A factor to multiply all distances by.
+      #   - `:includeLocs` [String] Output field naming WHICH location the distance
+      #     was measured to — the one that matters when the queried field holds
+      #     several points, or a Polygon. `includeLocs: 'matchedPoint'` adds a
+      #     `matchedPoint` field to each output document.
       #
       # @return [Mongo::Collection::View::Aggregation] The raw pipeline result — it
       #   yields `BSON::Document` hashes, NOT model instances, so read a field with

@@ -3,32 +3,42 @@
 require 'spec_helper'
 
 describe 'RGeo Wrapper' do
+  # This file asserts GeoRuby results too (#to_geo), and `with_rgeo!` does not
+  # provide them. Both helpers are a plain `require`, so whichever file ran
+  # first used to decide whether these examples passed — in file order,
+  # georuby_spec sorts ahead and left #to_geo behind for this one. Ask for
+  # what you read: `--order random:111` was 3 red before this hook.
+  before do
+    Mongoid::Geospatial.with_rgeo!
+    Mongoid::Geospatial.with_georuby!
+  end
+
   describe Mongoid::Geospatial::Point do
-    it 'should not interfer with mongoid' do
+    it 'does not interfere with mongoid' do
       Bar.create!(name: "Moe's")
       expect(Bar.count).to eql(1)
     end
   end
 
   describe Mongoid::Geospatial::Polygon do
-    it 'should not interfer with mongoid' do
+    it 'does not interfere with mongoid' do
       Farm.create!(name: 'Springfield Nuclear Power Plant')
       expect(Farm.count).to eql(1)
     end
 
-    it 'should respond to to_geo' do
+    it 'responds to to_geo' do
       farm = Farm.create!(area: [[5, 5], [6, 5], [6, 6], [5, 6]])
       expect(farm.area).to respond_to(:to_geo)
     end
   end
 
   describe Mongoid::Geospatial::LineString do
-    it 'should not interfer with mongoid' do
+    it 'does not interfere with mongoid' do
       River.create!(name: 'Mississippi')
       expect(River.count).to eql(1)
     end
 
-    it 'should respond to to_geo before loading external' do
+    it 'responds to to_geo' do
       river = River.create!(course: [[5, 5], [6, 5], [6, 6], [5, 6]])
       expect(river.course).to respond_to(:to_geo)
     end
@@ -44,41 +54,41 @@ describe 'RGeo Wrapper' do
 
     describe '(de)mongoize' do
       describe Mongoid::Geospatial::Point do
-        it 'should mongoize array' do
+        it 'mongoizes array' do
           geom = Bar.new(location: [10, -9]).location
           expect(geom.class).to eql(Mongoid::Geospatial::Point)
           expect(geom.x).to be_within(0.1).of(10)
         end
 
-        it 'should wrap to georuby' do
+        it 'wraps to georuby' do
           geom = Bar.new(location: [10, -9]).location
           expect(geom.to_geo.class)
             .to eql(GeoRuby::SimpleFeatures::Point)
           expect(geom.to_geo.y).to be_within(0.1).of(-9)
         end
 
-        it 'should wrap to rgeo' do
+        it 'wraps to rgeo' do
           geom = Bar.new(location: [10, -9]).location
           expect(geom.to_rgeo.class)
             .to eql(RGeo::Geographic::SphericalPointImpl)
           expect(geom.to_rgeo.y).to be_within(0.1).of(-9)
         end
 
-        it 'should mongoize hash' do
+        it 'mongoizes hash' do
           geom = Bar.new(location: { x: 10, y: -9 }).location
           expect(geom.class).to eql(Mongoid::Geospatial::Point)
           expect(geom.to_rgeo.class)
             .to eql(RGeo::Geographic::SphericalPointImpl)
         end
 
-        it 'should accept an RGeo object' do
+        it 'accepts an RGeo object' do
           point = RGeo::Geographic.spherical_factory.point 1, 2
           bar = Bar.create!(location: point)
           expect(bar.location.x).to be_within(0.1).of(1)
           expect(bar.location.y).to be_within(0.1).of(2)
         end
 
-        it 'should calculate 3d distances by default' do
+        it 'calculates 3d distances by default' do
           bar = Bar.create! location: [-73.77694444, 40.63861111]
           bar2 = Bar.create! location: [-118.40, 33.94] # ,:unit=>:mi
           expect(bar.location.rgeo_distance(bar2.location).to_i)
@@ -87,7 +97,7 @@ describe 'RGeo Wrapper' do
       end
 
       describe Mongoid::Geospatial::Polygon do
-        it 'should mongoize array' do
+        it 'mongoizes array' do
           geom = Farm.create!(area: [[5, 5], [6, 5], [6, 6], [5, 6]]).area
           expect(geom.class).to eql(Mongoid::Geospatial::Polygon)
           expect(geom.to_rgeo.class)
@@ -98,7 +108,7 @@ describe 'RGeo Wrapper' do
       end
 
       describe Mongoid::Geospatial::LineString do
-        it 'should mongoize array' do
+        it 'mongoizes array' do
           geom = River.create!(course: [[5, 5], [6, 5], [6, 6], [5, 6]]).course
           expect(geom.class).to eql(Mongoid::Geospatial::LineString)
           expect(geom.to_rgeo.class)

@@ -4,24 +4,24 @@ require 'spec_helper'
 
 describe Mongoid::Geospatial do
   context 'Class Stuff' do
-    it 'should have an lng_symbols accessor' do
+    it 'has an lng_symbols accessor' do
       expect(Mongoid::Geospatial.lng_symbols).to be_instance_of Array
       expect(Mongoid::Geospatial.lng_symbols).to include :x
     end
 
-    it 'should have an lat_symbols accessor' do
+    it 'has an lat_symbols accessor' do
       expect(Mongoid::Geospatial.lat_symbols).to be_instance_of Array
       expect(Mongoid::Geospatial.lat_symbols).to include :y
     end
   end
 
   context 'Creating indexes' do
-    it 'should create a 2d index' do
+    it 'creates a 2d index' do
       Bar.create_indexes
       expect(Bar.collection.indexes.get(location: '2d')).not_to be_nil
     end
 
-    it 'should create a 2dsphere index' do
+    it 'creates a 2dsphere index' do
       Alarm.create_indexes
       expect(Alarm.collection.indexes.get(spot: '2dsphere')).not_to be_nil
     end
@@ -134,18 +134,18 @@ describe Mongoid::Geospatial do
     context ':query' do
       before do
         3.times do
-          Alarm.create(spot: [jfk.spot.x + rand(0), jfk.spot.y + rand(0)])
+          Alarm.create(spot: [jfk.spot.x + rand, jfk.spot.y + rand])
         end
       end
 
-      it 'should filter using extra query option' do
+      it 'filters using extra query option' do
         query = Alarm.near_sphere(spot: jfk.spot).where(name: jfk.name)
         expect(query.to_a).to eq [jfk]
       end
     end
 
     context ':maxDistance' do
-      it 'should get 1 item' do
+      it 'gets 1 item' do
         spot = 2465 / Mongoid::Geospatial.earth_radius[:mi]
         query = Alarm.near_sphere(spot: lax.spot).max_distance(spot: spot)
         expect(query.to_a.size).to eq 1
@@ -181,72 +181,19 @@ describe Mongoid::Geospatial do
         expect(Alarm.where(name: 'jfk').within(jfk.spot, 10)).to eq([jfk])
       end
     end
-
-    #     context ':distance_multiplier' do
-    #       it "should multiply returned distance with multiplier" do
-    #         Bar.geo_near(lax.location,
-    #         ::distance_multiplier=> Mongoid::Geospatial.earth_radius[:mi])
-    #            .second.geo[:distance].to_i.should be_within(1).of(2469)
-    #       end
-    #     end
-
-    #     context ':unit' do
-    #       it "should multiply returned distance with multiplier" do
-    #         Bar.geo_near(lax.location, :spherical => true, :unit => :mi)
-    #           .second.geo[:distance].to_i.should be_within(1).of(2469)
-    #       end
-
-    #       it "should convert max_distance to radians with unit" do
-    #         Bar.geo_near(lax.location, :spherical => true,
-    #          :max_distance => 2465, :unit => :mi).size.should == 1
-    #       end
-
-    #     end
-
-    #   end
-
-    #   context 'criteria chaining' do
-    #     it "should filter by where" do
-    #       Bar.where(:name => jfk.name).geo_near(jfk.location).should == [jfk]
-    #       Bar.any_of({:name => jfk.name},{:name => lax.name})
-    #         .geo_near(jfk.location).should == [jfk,lax]
-    #     end
-    #   end
-    # end
   end
 
   context '#geo_near' do
     before do
       Bar.create_indexes
-      bar1 = Bar.create!(name: 'Bar1', location: [10, 20])
-      bar2 = Bar.create!(name: 'Bar2', location: [10.1, 20.1])
-      bar3 = Bar.create!(name: 'Bar3', location: [21, 21])
-      @bars = [bar1, bar2, bar3]
+      # ~15km and ~1150km out from [10, 20].
+      Bar.create!(name: 'Bar1', location: [10, 20])
+      Bar.create!(name: 'Bar2', location: [10.1, 20.1])
+      Bar.create!(name: 'Bar3', location: [21, 21])
       @query = Bar.geo_near(:location, [10, 20]).to_a
     end
 
-    #   # Find places near [10, 20], using spherical calculations, up to 5km away
-    #   Place.geo_near(:location, [10, 20],
-    #                  spherical: true,
-    #                  maxDistance: 5000, # 5 kilometers in meters
-    #                  distanceField: 'dist.calculated',
-    #                  query: { category: 'restaurant' },
-    #                  limit: 10)
-    #
-    #   # Iterate over results
-    #   Place.geo_near(:location, [10, 20], spherical: true).each do |place|
-    #     puts "#{place.name} is #{place.distance} meters away." # Assumes distanceField is 'distance'
-    #   end
-    #
-    #  expect(Bar.geo_near(:location, [10, 20]).to_a).to eq({
-    #     "_id" => BSON::ObjectId('68495baf60922e3041f5ddea'),
-    #     "distance" => 0.0,
-    #     "location" => [10.0, 20.0],
-    #     "name" => "Bar1"
-    #   },
-    #   ...
-    #
-    it 'should return places with distance near a point' do
+    it 'returns places with distance near a point' do
       expect(@query.first['distance']).to be_zero
     end
 
