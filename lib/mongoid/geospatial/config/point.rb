@@ -10,8 +10,8 @@ module Mongoid
 
         def reset!
           # Now self.x and self.y refer to the public module accessors
-          self.x = Mongoid::Geospatial.lng_symbols
-          self.y = Mongoid::Geospatial.lat_symbols
+          self.x = Mongoid::Geospatial.lng_symbols.dup
+          self.y = Mongoid::Geospatial.lat_symbols.dup
         end
 
         # Initialize the configuration

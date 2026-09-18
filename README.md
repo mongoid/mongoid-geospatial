@@ -105,7 +105,7 @@ cafe.location.to_hsh   # => { x: -74.026667, y: 40.703056 }
 Commonly used
 
 ```ruby
-cafe.location.to_lat_lon   # => { lat: 40.703056, lon: -74.026667 }
+cafe.location.to_lat_lon   # => { latitude: 40.703056, longitude: -74.026667 }
 cafe.location.lat          # => 40.703056
 cafe.location.lng          # => -74.026667
 cafe.location.distance(other) # => km, haversine
@@ -238,10 +238,30 @@ Bar.where(:location.near_sphere => person.house)
 Bar.nearby(person.house)
 Bar.nearby(person.house, km: 30)
 Bar.within(person.house, 30)          # same question, km required
+Bar.nearest(person.house, 30)         # the closest one, or nil
+Ride.within(here, 5, field: :drop_up) # two pins? name the one you mean
 City.where(:geom.near_sphere => Mongoid::Geospatial.near_query(geom, 50))
 ```
 
-`within` is `$nearSphere` + `$maxDistance` in metres. Nearest first, chainable.
+`within` caps by km, nearest first, chainable — on either index. `$nearSphere`
+speaks two dialects and **the field's index picks which**, so the km never moves:
+
+```
+   sphere: true    { loc: { $nearSphere: { $geometry: {..}, $maxDistance: <metres> } } }
+   spatial: true   { loc: { $nearSphere: [x, y],            $maxDistance: <radians> } }
+                                                                          km / 6371
+```
+
+Hand the server the wrong one and it answers `NoQueryExecutionPlans` — not a
+wrong count, a raise.
+
+**`within(..).first` is not the nearest one.** Mongoid's `#first` and `#last`
+sort by `_id` whenever the criteria carries no sort of its own, and that `_id`
+sort replaces the distance order `$near` put there. It reads as working every
+time the closest document happens to be the oldest. Walk the criteria
+(`.to_a.first`) or ask `nearest`. `Mongoid::Geospatial.near_selector(field, point, km,
+sphere: <bool>)` is the one place both shapes are built; `near_query` is the
+2dsphere half of it, for a query you write by hand.
 
 **Don't call `#first` or `#last` on a `$near` criteria.** Mongoid sorts by
 `_id` when a criteria carries no sort of its own, and that replaces the
@@ -284,12 +304,14 @@ Place.geo_near(:location, [10, 20],
                query: { category: 'restaurant' }, # Optional: filter documents before geoNear
                limit: 10)
 
-# Iterate over results
-Place.geo_near(:location, [10, 20], spherical: true).each do |place|
-  # 'place.distance' will be available if distanceField was 'distance' (the default)
-  # or 'place.dist_calculated' if distanceField was 'dist.calculated'
-  puts "#{place.name} is #{place.distance || place.dist_calculated} meters away."
+# Iterate over results — HASHES, not documents. Nothing is instantiated:
+# $geoNear adds fields a model has no field for.
+Place.geo_near(:location, [10, 20], spherical: true).each do |doc|
+  puts "#{doc['name']} is #{doc['distance']} meters away."
 end
+
+# Want models? ask for them at the call site:
+Place.geo_near(:location, [10, 20]).map { |attrs| Place.instantiate(attrs) }
 ```
 
 Key features and options for `geo_near`:

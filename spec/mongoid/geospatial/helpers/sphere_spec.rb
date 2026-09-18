@@ -25,6 +25,10 @@ describe Mongoid::Fields do
       expect(Alarm.spatial_fields).to eql([:spot])
     end
 
+    it 'names each indexed field once' do
+      expect(Alarm.spatial_fields_indexed).to eql([:spot])
+    end
+
     it 'should correctly instantiate the field type when a spherical index is defined' do
       far = Alarm.create!(name: 'Far', spot: [7, 7])
       expect(far.spot).to be_instance_of(Mongoid::Geospatial::Point)

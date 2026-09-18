@@ -29,4 +29,13 @@ describe Mongoid::Geospatial::Box do
     # Center of [[1,2], [3,4]] is [(1+3)/2, (2+4)/2] = [2,3]
     expect(alarm.area.center).to eq([2.0, 3.0])
   end
+
+  # No points, no box. The old answer was [[MAX, MAX], [-MAX, -MAX]] with a
+  # center of [0.0, 0.0] — which reads like a place off the Gulf of Guinea.
+  it 'has no box and no centre when it has no points' do
+    empty = described_class.new([])
+    expect(empty.bbox).to be_nil
+    expect(empty.center).to be_nil
+    expect(empty.radius).to be_nil
+  end
 end

@@ -162,9 +162,19 @@ describe Mongoid::Geospatial do
         expect(Alarm.nearby(lax.spot, km: 10)).to eq([lax])
       end
 
-      it 'asks $nearSphere even when the field was declared 2d' do
-        Bar.create_indexes
-        expect(Bar.nearby([1, 1], km: 1).selector['location']).to have_key('$nearSphere')
+      # The dialect comes off the field declaration, not off the caller.
+      # Executed against both index kinds in helpers/nearby_spec.rb.
+      it 'reads the dialect off the field, radians for a 2d one' do
+        expect(Bar.nearby([1, 1], km: 1).selector['location'])
+          .to eq('$nearSphere' => [1.0, 1.0],
+                 '$maxDistance' => 1 / Mongoid::Geospatial::EARTH_RADIUS_KM.to_f)
+        expect(Alarm.nearby([1, 1], km: 1).selector['spot']['$nearSphere'])
+          .to have_key('$geometry')
+      end
+
+      it 'refuses a cap it cannot measure' do
+        expect { Alarm.within(lax.spot, nil) }.to raise_error(ArgumentError)
+        expect { Alarm.nearby(lax.spot, km: 0) }.to raise_error(ArgumentError)
       end
 
       it 'chains on a criteria' do
@@ -238,6 +248,13 @@ describe Mongoid::Geospatial do
     #
     it 'should return places with distance near a point' do
       expect(@query.first['distance']).to be_zero
+    end
+
+    # $geoNear adds fields a Bar does not have. Nothing is instantiated —
+    # the docs promise hashes, so hold them to it.
+    it 'hands back hashes, not documents' do
+      expect(@query.first).to be_a(Hash)
+      expect(@query.first).not_to be_a(Mongoid::Document)
     end
 
     it 'caps with km, in metres, on the sphere' do

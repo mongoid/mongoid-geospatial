@@ -85,11 +85,39 @@ module Mongoid
     end
 
     #
-    # Selector for `$nearSphere` with a km cap. Metres on the wire.
+    # A cap Mongo can measure: a positive number of kilometres.
+    #
+    def self.km!(km) # rubocop:disable Naming/MethodParameterName
+      raise ArgumentError, "Invalid km: #{km.inspect}" unless km.is_a?(Numeric) && km.positive?
+
+      km
+    end
+
+    #
+    # `$nearSphere` value with a km cap, GeoJSON. Metres on the wire.
+    # This is the 2dsphere shape — see #near_selector for the other one.
     #
     def self.near_query(geom, km) # rubocop:disable Naming/MethodParameterName
       { '$geometry' => { 'type' => 'Point', 'coordinates' => mongoize_point!(geom) },
-        '$maxDistance' => km * 1_000 }
+        '$maxDistance' => km!(km) * 1_000 }
+    end
+
+    #
+    # The whole `{ field => ... }` selector for "within +km+", for either index.
+    #
+    # `$nearSphere` speaks two dialects and the index picks which:
+    #
+    #   2dsphere   { loc: { $nearSphere: { $geometry: {...}, $maxDistance: <m> } } }
+    #   2d         { loc: { $nearSphere: [x, y],             $maxDistance: <rad> } }
+    #
+    # Hand the wrong one over and the server answers `NoQueryExecutionPlans`,
+    # not a wrong count — so ask the field which it is before building.
+    #
+    def self.near_selector(field, geom, km, sphere: true) # rubocop:disable Naming/MethodParameterName
+      return { field => { '$nearSphere' => near_query(geom, km) } } if sphere
+
+      { field => { '$nearSphere' => mongoize_point!(geom),
+                   '$maxDistance' => km!(km) / EARTH_RADIUS_KM.to_f } }
     end
 
     # Methods applied to Document's class
@@ -101,7 +129,7 @@ module Mongoid
       # @param options [Hash] Additional options for the index.
       #
       def spatial_index(name, options = {})
-        spatial_fields_indexed << name
+        remember_indexed(name)
         index({ name => '2d' }, options)
       end
 
@@ -112,10 +140,19 @@ module Mongoid
       # @param options [Hash] Additional options for the index.
       #
       def spherical_index(name, options = {})
-        spatial_fields_indexed << name
+        remember_indexed(name)
         index({ name => '2dsphere' }, options)
       end
       alias sphere_index spherical_index
+
+      #
+      # One field, one entry, always a Symbol — a field may carry both a 2d
+      # and a 2dsphere index, and `spatial: true` calls this on its way in too.
+      #
+      def remember_indexed(name)
+        sym = name.to_sym
+        spatial_fields_indexed << sym unless spatial_fields_indexed.include?(sym)
+      end
 
       #
       # A Point on a 2dsphere index. Default name is `geom`.
@@ -232,7 +269,7 @@ module Mongoid
       #
       # @param coordinates [Array, Mongoid::Geospatial::Point] The coordinates (e.g., [lon, lat])
       #   or a Point object to find documents near to.
-      # @param km [Numeric, nil] Optional cap in kilometres (`$maxDistance` in metres).
+      # @param km [Numeric, nil] Optional cap in kilometres.
       #
       # @return [Mongoid::Criteria] A criteria object for the query.
       #
@@ -240,33 +277,51 @@ module Mongoid
       #   Bar.nearby([10, 20])
       #   Alarm.nearby(my_point_object, km: 30)
       #
-      def nearby(coordinates, km: nil, **_opts) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Naming/MethodParameterName
-        if spatial_fields.empty?
-          raise "No spatial fields defined for #{name} to use with .nearby. " \
-                "Mark a field with 'spatial: true' or 'sphere: true'."
-        end
+      def nearby(coordinates, km: nil, field: nil) # rubocop:disable Naming/MethodParameterName
+        pin, sphere = spatial_field(field)
+        return criteria.where(Mongoid::Geospatial.near_selector(pin, coordinates, km, sphere: sphere)) if km
 
-        field_name_sym = spatial_fields.first.to_sym
-        field_definition = fields[field_name_sym.to_s]
-
-        raise "Could not find field definition for spatial field: #{field_name_sym}" unless field_definition
-
-        if km
-          # GeoJSON `$maxDistance` is metres. `$near` on a 2d index is radians.
-          query = Mongoid::Geospatial.near_query(coordinates, km)
-          criteria.where(field_name_sym.near_sphere => query)
-        else
-          query_operator = field_definition.options[:sphere] ? :near_sphere : :near
-          criteria.where(field_name_sym.send(query_operator) => coordinates)
-        end
+        criteria.where(pin.send(sphere ? :near_sphere : :near) => coordinates)
       end
 
       #
-      # Documents within +km+ of +geom+, nearest first.
-      # `$nearSphere` + `$maxDistance` in metres.
+      # The pin `.nearby`, `.within` and `.nearest` read, and whether it is on
+      # a sphere. Handed nothing, the first spatial field — a model with two
+      # pins (`geom :pick_up`, `geom :drop_up`) has to name the one it means.
       #
-      def within(geom, km) # rubocop:disable Naming/MethodParameterName
-        nearby(geom, km: km)
+      # @return [Array] [field name as a Symbol, sphere?]
+      #
+      def spatial_field(field = nil)
+        sym = (field || spatial_fields.first)&.to_sym
+        unless sym && spatial_fields.include?(sym)
+          raise ArgumentError, "#{name} has no spatial field #{sym.inspect} — it has #{spatial_fields.inspect}. " \
+                               "Mark one with 'spatial: true' or 'sphere: true'."
+        end
+
+        [sym, fields.fetch(sym.to_s).options[:sphere] ? true : false]
+      end
+
+      #
+      # Documents within +km+ of +geom+, nearest first. Spherical either way:
+      # the field's index decides the dialect, see .near_selector.
+      #
+      def within(geom, km, field: nil) # rubocop:disable Naming/MethodParameterName
+        nearby(geom, km: Mongoid::Geospatial.km!(km), field: field)
+      end
+
+      #
+      # The single closest document within +km+, or nil.
+      #
+      #   `within(geom, km).first`   NOT the nearest one
+      #   `nearest(geom, km)`        the nearest one
+      #
+      # Mongoid's #first and #last sort by `_id` when the criteria carries no
+      # sort of its own (contextual/mongo.rb, `view.sort || { _id: 1 }`), and
+      # that _id sort replaces the distance order `$near` put there. It reads
+      # as working every time the closest document happens to be the oldest.
+      #
+      def nearest(geom, km, field: nil) # rubocop:disable Naming/MethodParameterName
+        within(geom, km, field: field).limit(1).to_a.first
       end
 
       # Performs a $geoNear aggregation pipeline stage to find documents near a point,
@@ -296,10 +351,12 @@ module Mongoid
       #     geometries (e.g., a Polygon), as it shows which specific point was used for the distance calculation.
       #     Example: `includeLocs: 'matchedPoint'` would add a `matchedPoint` field to each output document.
       #
-      # @return [Array<Mongoid::Document>] An array of instantiated Mongoid documents.
-      #   Each document will include its original fields plus any fields added by the `$geoNear` stage,
-      #   such as the field specified by `:distanceField` (e.g., `document.distance`) and `:includeLocs`.
-      #   These additional fields are accessible as dynamic attributes on the model instances.
+      # @return [Mongo::Collection::View::Aggregation] The raw pipeline result — it
+      #   yields `BSON::Document` hashes, NOT model instances, so read a field with
+      #   `doc['name']` and the distance with `doc['distance']` (or whatever
+      #   `:distanceField` was set to). Nothing is instantiated: `$geoNear` adds fields
+      #   a document does not have, and a Point field comes back as a raw pair.
+      #   Need models? `.map { |attrs| Model.instantiate(attrs) }` at the call site.
       #
       # @raise [ArgumentError] If coordinates cannot be mongoized.
       #
@@ -312,9 +369,9 @@ module Mongoid
       #                  query: { category: 'restaurant' },
       #                  limit: 10)
       #
-      #   # Iterate over results
-      #   Place.geo_near(:location, [10, 20], spherical: true).each do |place|
-      #     puts "#{place.name} is #{place.distance} meters away." # Assumes distanceField is 'distance'
+      #   # Iterate over results — hashes, not documents
+      #   Place.geo_near(:location, [10, 20], spherical: true).each do |doc|
+      #     puts "#{doc['name']} is #{doc['distance']} meters away."
       #   end
       #
       def geo_near(field_name, coordinates, options = {})
@@ -363,15 +420,7 @@ module Mongoid
         # Add $limit stage if limit_value was provided
         pipeline << { '$limit' => limit_value.to_i } if limit_value
 
-        # Execute the aggregation pipeline
         collection.aggregate(pipeline)
-
-        # Don't instantiate results here.
-        # aggregated_results = collection.aggregate(pipeline)
-        # Map the raw Hash results from aggregation to Mongoid model instances.
-        # Mongoid's #instantiate method correctly handles creating model objects
-        # and assigning attributes, including dynamic ones like the distanceField.
-        # aggregated_results.map { |attrs| instantiate(attrs) }
       end
     end
   end

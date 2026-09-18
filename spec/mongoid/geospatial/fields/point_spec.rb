@@ -174,46 +174,46 @@ describe Mongoid::Geospatial::Point do
     end
 
     describe ':near :near_sphere' do
+      # [lng, lat], the order Mongo stores. Jim is in Barcelona, and the three
+      # are 830 / 1350 / 1500 km out from him, in that order.
       let!(:berlin) do
-        Bar.create(name: :berlin, location: [52.30, 13.25])
+        Bar.create(name: :berlin, location: [13.40, 52.52])
       end
 
       let!(:prague) do
-        Bar.create(name: :prague, location: [50.5, 14.26])
+        Bar.create(name: :prague, location: [14.42, 50.08])
       end
 
       let!(:paris) do
-        Bar.create(name: :paris, location: [48.48, 2.20])
+        Bar.create(name: :paris, location: [2.35, 48.86])
       end
 
       let!(:jim) do
-        Person.new(location: [41.23, 2.9])
+        Person.new(location: [2.17, 41.39])
       end
 
-      it 'returns the documents sorted closest to furthest' do
+      it 'sorts closest to furthest through the spatial_scope' do
         expect(Bar.closest_to_location(jim.location).to_a)
           .to eq([paris, prague, berlin])
       end
 
-      it 'returns the documents sorted closest to furthest' do
+      it 'sorts closest to furthest through the symbol key' do
         expect(Bar.where(:location.near => jim.location).to_a)
           .to eq([paris, prague, berlin])
       end
 
-      it 'returns the documents sorted closest to furthest' do
+      it 'sorts closest to furthest through .near' do
         expect(Bar.near(location: jim.location))
           .to eq([paris, prague, berlin])
       end
 
-      it 'returns the documents sorted closest to furthest sphere' do
-        person = Person.new(location: [41.23, 2.9])
-        expect(Bar.near_sphere(location: person.location))
+      it 'sorts closest to furthest through .near_sphere' do
+        expect(Bar.near_sphere(location: jim.location))
           .to eq([paris, prague, berlin])
       end
 
-      it 'returns the documents sorted closest to furthest sphere' do
-        person = Person.new(location: [41.23, 2.9])
-        expect(Bar.where(:location.near_sphere => person.location))
+      it 'sorts closest to furthest through the near_sphere symbol key' do
+        expect(Bar.where(:location.near_sphere => jim.location))
           .to eq([paris, prague, berlin])
       end
 
@@ -306,6 +306,25 @@ describe Mongoid::Geospatial::Point do
       expect(geom.y).to be_within(0.1).of(-9)
     end
 
+    # It is the shape #to_geo_json writes, the shape Mongo stores a 2dsphere
+    # geometry in, and the shape .geo_near documents. Read it back.
+    it 'reads the GeoJSON it writes, either key flavour' do
+      point = described_class.new(1.0009, 21.009)
+      expect(described_class.mongoize(point.to_geo_json)).to eq([1.0009, 21.009])
+      expect(described_class.mongoize('type' => 'Point', 'coordinates' => [10, -9]))
+        .to eq([10.0, -9.0])
+    end
+
+    it 'keeps two coordinates from a string, like it does from an array' do
+      expect(described_class.mongoize('1 2 3')).to eq([1.0, 2.0])
+      expect(described_class.mongoize([1, 2, 3])).to eq([1.0, 2.0])
+    end
+
+    it 'says which point it could not read' do
+      expect { described_class.new(1, 2).distance('7') }.to raise_error(ArgumentError)
+      expect { described_class.new(1, nil)[0] }.to raise_error(ArgumentError)
+    end
+
     # should raise
     # geom.to_geo
 
@@ -317,17 +336,8 @@ describe Mongoid::Geospatial::Point do
         raise 'RGeo or RGeo::Feature::Point not loaded' unless defined?(RGeo::Feature::Point)
       end
 
-      after do
-        # Attempt to clean up RGeo integration to avoid interference with other tests.
-        # This is a simplistic approach; ideally, RGeo tests might be further isolated.
-        # Undefine the to_rgeo method if it was added to Point
-        if Mongoid::Geospatial.const_defined?(:Wrappers) && Mongoid::Geospatial::Wrappers.const_defined?(:Rgeo) && Mongoid::Geospatial::Point.method_defined?(:to_rgeo)
-          Mongoid::Geospatial::Point.send(:remove_method, :to_rgeo)
-        end
-        # Potentially remove other RGeo specific methods if added to other classes
-        # Resetting the factory if it was set by RGeo integration
-        Mongoid::Geospatial.factory = nil
-      end
+      # No teardown: `with_rgeo!` is a `require`, so the first example that
+      # calls it wires #to_rgeo in for the whole run. There is nothing to undo.
 
       describe 'instantiated' do
         let(:bar) { Bar.new(name: 'Vitinho', location: [10, 10]) }

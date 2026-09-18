@@ -35,7 +35,9 @@ module Mongoid
       alias to_lng_lat mongoize
 
       def [](args)
-        mongoize[args]
+        raise ArgumentError, "Invalid point: #{inspect}" unless (pair = mongoize)
+
+        pair[args]
       end
 
       def each
@@ -49,7 +51,9 @@ module Mongoid
       # @return [Array] with [self, radius]
       #
       def radius(r = 1) # rubocop:disable Naming/MethodParameterName
-        [mongoize, r]
+        return nil unless (pair = mongoize)
+
+        [pair, r]
       end
 
       #
@@ -60,7 +64,7 @@ module Mongoid
       # @return [Array] with [self, radius / earth radius]
       #
       def radius_sphere(r = 1, unit = :km) # rubocop:disable Naming/MethodParameterName
-        radius r.to_f / Mongoid::Geospatial.earth_radius[unit]
+        radius r.to_f / Mongoid::Geospatial.earth_radius.fetch(unit)
       end
 
       #
@@ -135,7 +139,7 @@ module Mongoid
       #
       def distance(other, unit = :km) # rubocop:disable Metrics/AbcSize
         xy = other.is_a?(Point) ? [other.x, other.y] : self.class.mongoize(other)
-        raise ArgumentError, "Invalid point: #{other.inspect}" unless xy
+        raise ArgumentError, "Invalid point: #{other.inspect}" unless xy&.size == 2
 
         dlat = (xy[1] - y) * RAD_PER_DEG
         dlon = (xy[0] - x) * RAD_PER_DEG
@@ -195,7 +199,7 @@ module Mongoid
         def from_string(str)
           return nil if str.empty?
 
-          str.split(/,|\s/).reject(&:empty?).map(&:to_f)
+          from_array(str.split(/,|\s/).reject(&:empty?))
         end
 
         #
@@ -228,6 +232,9 @@ module Mongoid
         # @return (Array)
         #
         def from_hash(hsh)
+          coords = hsh[:coordinates] || hsh['coordinates']
+          return from_array(coords) if coords
+
           raise 'Hash must have at least 2 items' if hsh.size < 2
 
           [from_hash_x(hsh), from_hash_y(hsh)]

@@ -24,6 +24,12 @@ describe Mongoid::Fields do
       expect(Bar.spatial_fields).to eql([:location])
     end
 
+    # Bar declares `spatial: true` AND `spherical_index` on the same field:
+    # two indexes, still one field, and the reader says so once.
+    it 'names each indexed field once' do
+      expect(Bar.spatial_fields_indexed).to eql([:location])
+    end
+
     it 'should set some class methods' do
       far  = Bar.create!(name: 'Far', location: [7, 7])
       near = Bar.create!(name: 'Near', location: [2, 2])

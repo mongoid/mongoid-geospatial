@@ -16,10 +16,11 @@ Gem::Specification.new do |gem|
 
   gem.metadata['rubygems_mfa_required'] = 'true'
 
-  # Use Dir.glob to list all files within the lib directory
-  gem.files = Dir.glob('lib/**/*') + ['README.md', 'MIT-LICENSE']
+  gem.files = Dir.glob('lib/**/*').select { |f| File.file?(f) } + ['README.md', 'MIT-LICENSE']
   gem.require_paths = ['lib']
 
-  gem.add_dependency('mongoid', ['>= 4.0.0'])
-  gem.metadata['rubygems_mfa_required'] = 'true'
+  # `Symbol.add_key(name, :override, ...)` in keys.rb is the post-Origin
+  # signature — Mongoid 7 merged Origin in. A 4/5/6 install resolves, then
+  # breaks at load, which is worse than not resolving.
+  gem.add_dependency('mongoid', ['>= 7.0.0'])
 end

@@ -19,16 +19,10 @@ module Mongoid
       # @return [Array] containing 2 points
       #
       def bounding_box
-        max_x = -Float::MAX
-        min_x = Float::MAX
-        max_y = -Float::MAX
-        min_y = Float::MAX
-        each do |point|
-          max_y = point[1] if point[1] > max_y
-          min_y = point[1] if point[1] < min_y
-          max_x = point[0] if point[0] > max_x
-          min_x = point[0] if point[0] < min_x
-        end
+        return nil if empty?
+
+        min_x, max_x = map { |point| point[0] }.minmax
+        min_y, max_y = map { |point| point[1] }.minmax
         [[min_x, min_y], [max_x, max_y]]
       end
       alias bbox bounding_box
@@ -43,7 +37,9 @@ module Mongoid
       # @return [Array] containing 5 points
       #
       def geom_box
-        xl, yl = bounding_box
+        return nil unless (box = bounding_box)
+
+        xl, yl = box
         [xl, [xl[0], yl[1]], yl, [yl[0], xl[1]], xl]
       end
 
@@ -54,7 +50,9 @@ module Mongoid
       # @return [Array] containing 1 point [x,y]
       #
       def center_point
-        min, max = *bbox
+        return nil unless (box = bbox)
+
+        min, max = *box
         [(min[0] + max[0]) / 2.0, (min[1] + max[1]) / 2.0]
       end
       alias center center_point
@@ -66,7 +64,9 @@ module Mongoid
       # @return [Array]  [point, r] point and radius in mongoid format
       #
       def radius(r = 1) # rubocop:disable Naming/MethodParameterName
-        [center, r]
+        return nil unless (mid = center)
+
+        [mid, r]
       end
 
       #
@@ -78,7 +78,7 @@ module Mongoid
       # @return [Array]
       #
       def radius_sphere(r = 1, unit = :km) # rubocop:disable Naming/MethodParameterName
-        radius r.to_f / Mongoid::Geospatial.earth_radius[unit]
+        radius r.to_f / Mongoid::Geospatial.earth_radius.fetch(unit)
       end
 
       class << self
