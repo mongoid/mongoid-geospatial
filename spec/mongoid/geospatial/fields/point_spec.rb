@@ -159,6 +159,15 @@ describe Mongoid::Geospatial::Point do
       expect([bar.location.lng, bar.location.lat]).to eq([3.0, 2.0])
     end
 
+    it 'equals another point at the same spot, not by identity' do
+      expect(bar.location).to eq(Bar.find(bar.id).location)
+      expect(bar.location).not_to equal(Bar.find(bar.id).location)
+      expect(described_class.new(3, 2)).to eq(described_class.new(3.0, 2.0))
+      expect(described_class.new(3, 2)).not_to eq(described_class.new(2, 3))
+      expect(described_class.new(3, 2)).not_to eq([3, 2])
+      expect([described_class.new(3, 2), described_class.new(3, 2)].uniq.size).to eq(1)
+    end
+
     it 'walks crow-flies km (JFK–LAX)' do
       jfk = described_class.new(-73.7781, 40.6413)
       lax = described_class.new(-118.4085, 33.9416)

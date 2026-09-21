@@ -34,6 +34,19 @@ module Mongoid
       alias to_xy mongoize
       alias to_lng_lat mongoize
 
+      # Two points are the same spot when they hold the same pair. Without
+      # this, `==` was object identity (Enumerable does not bring one), so a
+      # point loaded twice never equalled itself: `place.geom == city.geom`
+      # was false for the very same [x, y]. Only a Point equals a Point —
+      # `to_a` is the door to compare with an Array. z is not stored (see
+      # #mongoize), so it does not take part.
+      def ==(other)
+        other.is_a?(Point) && mongoize == other.mongoize
+      end
+      alias eql? ==
+
+      def hash = [Point, mongoize].hash
+
       def [](args)
         raise ArgumentError, "Invalid point: #{inspect}" unless (pair = mongoize)
 

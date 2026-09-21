@@ -1,3 +1,9 @@
+## Unreleased
+
+* Fix: `Point#==` was object identity, so the same `[x, y]` loaded twice was
+  never equal (`place.geom == city.geom` false for one spot). `==`, `eql?`
+  and `hash` now compare the stored pair; a Point never equals an Array.
+
 ## 7.3.0 (2026/09/17)
 
 `within` did not work. 7.2's headline — a km cap — asked `$nearSphere` for
