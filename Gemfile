@@ -3,6 +3,7 @@
 source 'https://rubygems.org'
 
 version = ENV['MONGOID_VERSION'] || '9'
+gem 'json', '< 3' # ActiveSupport before 8.1 passes the removed quirks_mode option.
 gem 'logger'
 gem 'mongoid', version =~ /\A\d+\z/ ? "~> #{version}.0" : version
 
@@ -24,5 +25,5 @@ group :development, :test do
 end
 
 group :test do
-  gem 'coveralls', require: false if ENV['CI']
+  gem 'simplecov', '~> 0.22', require: false if ENV['COVERAGE'] == 'true'
 end
