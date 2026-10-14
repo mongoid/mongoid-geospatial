@@ -3,13 +3,14 @@
 A Mongoid Extension that simplifies the use of MongoDB spatial features.
 
 [![Gem Version](https://badge.fury.io/rb/mongoid-geospatial.svg)](http://badge.fury.io/rb/mongoid-geospatial)
+[![Test](https://github.com/mongoid/mongoid-geospatial/actions/workflows/test.yml/badge.svg)](https://github.com/mongoid/mongoid-geospatial/actions/workflows/test.yml)
 [![Code Climate](https://codeclimate.com/github/mongoid/mongoid-geospatial.svg)](https://codeclimate.com/github/mongoid/mongoid-geospatial)
-[![Coverage Status](https://coveralls.io/repos/github/mongoid/mongoid-geospatial/badge.svg?branch=master)](https://coveralls.io/github/mongoid/mongoid-geospatial?branch=master)
-[![Build Status](https://travis-ci.org/mongoid/mongoid-geospatial.svg?branch=master)](https://travis-ci.org/mongoid/mongoid-geospatial)
 
 ## Quick Start
 
-This gem focuses on (making helpers for) MongoDB's spatial features using Mongoid 5, 6 and 7.
+This gem focuses on (making helpers for) MongoDB's spatial features using Mongoid.
+
+CI tests representative compatible combinations of Ruby 3.1 through 4.0, Mongoid 7 through 9, and MongoDB Server 4.4 through 8.0, including Ruby 4.0 / Mongoid 9 / MongoDB 8.0. See [the test matrix](.github/workflows/test.yml); this is not a Cartesian product of supported versions. The existing Ruby 3.1 minimum in this branch excludes the historical Ruby 2.x / Mongoid 5–6 combinations. Set `MONGOID_VERSION` to select a Mongoid major version and `MONGODB_HOST` to override the default `localhost:27017` when running tests.
 
 ```ruby
 # Gemfile
