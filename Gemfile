@@ -2,8 +2,9 @@
 
 source 'https://rubygems.org'
 
-gem 'bson', github: 'mongodb/bson-ruby', branch: 'master' # GCC 15 issue
-gem 'mongoid'
+version = ENV['MONGOID_VERSION'] || '9'
+gem 'logger'
+gem 'mongoid', version =~ /\A\d+\z/ ? "~> #{version}.0" : version
 
 gemspec
 

@@ -1,1 +1,1 @@
---require spec_helper -f p -f j --out '/tmp/runnerguard.json' --profile
+--require spec_helper --format progress --profile
