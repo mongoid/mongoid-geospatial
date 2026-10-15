@@ -40,6 +40,24 @@ describe Mongoid::Geospatial::Polygon do
       expect(geom.radius_sphere(10)[1]).to be_within(0.001).of(0.001569)
     end
 
+    it 'loads a GeoJSON document stored in the database' do
+      coordinates = [[[1, 1], [1, 2], [1, 1]]]
+      document = BSON::Document.new(type: 'Polygon', coordinates: coordinates)
+
+      geom = described_class.demongoize(document)
+
+      expect(geom).to be_a(described_class)
+      expect(geom.to_a).to eq(coordinates)
+    end
+
+    it 'loads a GeoJSON hash with string keys' do
+      coordinates = [[[1, 1], [1, 2], [1, 1]]]
+
+      geom = described_class.demongoize('type' => 'Polygon', 'coordinates' => coordinates)
+
+      expect(geom.to_a).to eq(coordinates)
+    end
+
     describe 'with rgeo' do
       before do
         Mongoid::Geospatial.with_rgeo!

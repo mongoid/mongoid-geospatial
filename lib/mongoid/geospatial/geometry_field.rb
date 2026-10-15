@@ -87,7 +87,7 @@ module Mongoid
         #
         # @return [Object]
         def demongoize(obj)
-          obj && new(obj)
+          obj && new(obj.is_a?(Hash) ? obj['coordinates'] || obj[:coordinates] : obj)
         end
       end
     end
