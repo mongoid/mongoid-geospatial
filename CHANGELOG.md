@@ -1,6 +1,7 @@
 ## 7.4.2 (Next)
 
 * [#79](https://github.com/mongoid/mongoid-geospatial/pull/79): Cover bounded spherical searches, coordinate errors and RGeo arrays - [@dblock](https://github.com/dblock).
+* [#55](https://github.com/mongoid/mongoid-geospatial/issues/55): Read persisted empty Point arrays as nil so documents can be loaded and repaired - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 ## 7.4.1 (2026/10/14)
