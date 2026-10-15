@@ -3,6 +3,7 @@
 * [#66](https://github.com/mongoid/mongoid-geospatial/issues/66): Honor the configured RGeo factory for all geometry conversions - [@dblock](https://github.com/dblock).
 * [#79](https://github.com/mongoid/mongoid-geospatial/pull/79): Cover bounded spherical searches, coordinate errors and RGeo arrays - [@dblock](https://github.com/dblock).
 * [#55](https://github.com/mongoid/mongoid-geospatial/issues/55): Read persisted empty Point arrays as nil so documents can be loaded and repaired - [@dblock](https://github.com/dblock).
+* [#57](https://github.com/mongoid/mongoid-geospatial/issues/57): Correct polygon and bounding-box query examples to use Mongoid symbol operators inside where - [@dblock](https://github.com/dblock).
 * Your contribution here.
 * [#82](https://github.com/mongoid/mongoid-geospatial/pull/82): Lint Markdown, YAML, and spelling with rubocop-md, rubocop-prose, rubocop-spellcheck, and rubocop-yaml in a separate Lint workflow, and clean up documentation - [@dblock](https://github.com/dblock).
 * [#83](https://github.com/mongoid/mongoid-geospatial/pull/83): Run CI pushes only on the default branch, cancel superseded pull request runs, skip duplicate lint in the test matrix, and bound job times - [@dblock](https://github.com/dblock).

@@ -17,6 +17,7 @@ Metrics/BlockLength:
   Exclude:
     - 'spec/benchmark/geonear'
     - 'spec/mongoid/geospatial/fields/line_string_spec.rb'
+    - 'spec/mongoid/geospatial/fields/point_demongoization_spec.rb'
     - 'spec/mongoid/geospatial/fields/point_spec.rb'
     - 'spec/mongoid/geospatial/fields/polygon_spec.rb'
     - 'spec/mongoid/geospatial/helpers/delegate_spec.rb'
