@@ -21,6 +21,7 @@ jobs:
           - { ruby: '4.0', mongoid: '9', mongodb: '8.0' }
     env:
       MONGOID_VERSION: ${{ matrix.mongoid }}
+      COVERAGE: ${{ matrix.ruby == '4.0' && 'true' || 'false' }}
     services:
       mongo:
         image: mongo:${{ matrix.mongodb }}
@@ -40,3 +41,11 @@ jobs:
 
     - name: Run tests
       run: bundle exec rspec
+
+    - name: Report coverage to Coveralls
+      if: matrix.ruby == '4.0'
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        file: coverage/.resultset.json
+        format: simplecov

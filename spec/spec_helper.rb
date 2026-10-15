@@ -1,5 +1,13 @@
 # frozen_string_literal: true
 
+if ENV['COVERAGE'] == 'true'
+  require 'simplecov'
+  SimpleCov.start do
+    track_files 'lib/**/*.rb'
+    add_filter '/spec/'
+  end
+end
+
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
@@ -7,11 +15,6 @@ MODELS = File.join(File.dirname(__FILE__), 'models')
 SUPPORT = File.join(File.dirname(__FILE__), 'support')
 $LOAD_PATH.unshift(MODELS)
 $LOAD_PATH.unshift(SUPPORT)
-
-if ENV['CI']
-  require 'coveralls'
-  Coveralls.wear!
-end
 
 require 'rspec'
 require 'mongoid/geospatial'

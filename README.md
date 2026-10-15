@@ -3,8 +3,10 @@
 A Mongoid Extension that simplifies the use of MongoDB spatial features.
 
 [![Gem Version](https://badge.fury.io/rb/mongoid-geospatial.svg)](http://badge.fury.io/rb/mongoid-geospatial)
-[![Test](https://github.com/mongoid/mongoid-geospatial/actions/workflows/test.yml/badge.svg)](https://github.com/mongoid/mongoid-geospatial/actions/workflows/test.yml)
-[![Code Climate](https://codeclimate.com/github/mongoid/mongoid-geospatial.svg)](https://codeclimate.com/github/mongoid/mongoid-geospatial)
+[![Test](https://github.com/mongoid/mongoid-geospatial/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/mongoid/mongoid-geospatial/actions/workflows/test.yml?query=branch%3Amaster)
+[![Coverage Status](https://coveralls.io/repos/github/mongoid/mongoid-geospatial/badge.svg?branch=master)](https://coveralls.io/github/mongoid/mongoid-geospatial?branch=master)
+
+The Ruby 4.0 CI job measures all library files with SimpleCov and submits `coverage/.resultset.json` through the official Coveralls action using GitHub's automatic token. Other matrix jobs do not upload duplicate reports. Run `COVERAGE=true bundle install` and `COVERAGE=true bundle exec rake spec` to measure coverage locally. An accepted upstream default-branch build is required for the badge; this workflow alone does not activate the external service.
 
 ## Quick Start
 
