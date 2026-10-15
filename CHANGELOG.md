@@ -1,10 +1,12 @@
-## Unreleased
+## 7.4.1 (2026/10/14)
 
 * [#76](https://github.com/mongoid/mongoid-geospatial/pull/76): Fix: a geometry field stored as GeoJSON (`{ type, coordinates }`) raised `TypeError` on load (#46) - [@cschell](https://github.com/cschell).
 
 * [#75](https://github.com/mongoid/mongoid-geospatial/pull/75): Replace the obsolete quality badge and Ruby Coveralls uploader with real SimpleCov coverage, one official Coveralls reporting job, and upstream-default-branch badges.
 
 * [#74](https://github.com/mongoid/mongoid-geospatial/pull/74): Extend the GitHub Actions migration with representative compatibility coverage through Ruby 4.0, Mongoid 9, and MongoDB Server 8.0, released BSON dependencies, and configurable test database hosts.
+
+## 7.4.0 (2026/09/21)
 
 * Fix: `Point#==` was object identity, so the same `[x, y]` loaded twice was
   never equal (`place.geom == city.geom` false for one spot). `==`, `eql?`

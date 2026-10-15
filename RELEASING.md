@@ -1,62 +1,50 @@
-Releasing Mongoid::Geospatial
-=============================
+# Releasing Mongoid::Geospatial
 
-There're no particular rules about when to release mongoid-geospatial. Release bug fixes frequently, features not so frequently and breaking API changes rarely.
+## Prepare
 
-### Release
+Start in the upstream checkout on a clean `master`, run `git pull --ff-only`, and verify the latest [GitHub Actions](https://github.com/mongoid/mongoid-geospatial/actions) checks pass. Choose a patch version for fixes, a minor version for backward-compatible features, or a major version for breaking changes.
 
-Run tests, check that all tests succeed locally.
+Update `lib/mongoid/geospatial/version.rb` and date the corresponding section in `CHANGELOG.md` using `YYYY/MM/DD`. Remove its contribution placeholder. Do not include changes already published in an earlier gem.
 
-```
+```sh
 bundle install
 bundle exec rake
-```
-
-Check that the last build succeeded in [Travis CI](https://travis-ci.org/mongoid/mongoid-geospatial) for all supported platforms.
-
-Change "Next Release" in [CHANGELOG.md](CHANGELOG.md) to the new version.
-
-```
-### 0.4.0 (2014-01-27)
-```
-
-Remove the line with "Your contribution here.", since there will be no more contributions to this release.
-
-Commit your changes.
-
-```
-git add CHANGELOG.md lib/mongoid/geospatial/version.rb
-git commit -m "Preparing for release, 0.4.0."
+git add CHANGELOG.md lib/mongoid/geospatial/version.rb RELEASING.md
+git commit -m "Preparing for release, 7.4.1."
 git push origin master
 ```
 
-Release.
+Wait for the preparation commit's CI checks to pass.
 
-```
-$ rake release
+## Publish RubyGems and GitHub
 
-mongoid-geospatial 0.4.0 built to pkg/mongoid-geospatial-0.4.0.gem.
-Tagged v0.4.0.
-Pushed git commits and tags.
-Pushed mongoid-geospatial 0.4.0 to rubygems.org.
+```sh
+bundle exec rake release
 ```
 
-### Prepare for the Next Version
+This builds the gem and pushes its tag and package. Complete RubyGems MFA when requested. If publication is interrupted, check which steps succeeded before retrying; never move an existing release tag. If the tag was pushed but the gem was not published, resume with `gem push pkg/mongoid-geospatial-7.4.1.gem`.
 
-Add the next release to [CHANGELOG.md](CHANGELOG.md).
+A tag alone is not a GitHub release. After verifying RubyGems publication, publish the matching GitHub release with that version's changelog entries:
 
+```sh
+version=7.4.1
+notes="$(mktemp)"
+awk -v version="$version" '
+  /^## / {
+    if (found) exit
+    if ($2 == version) found = 1
+    next
+  }
+  found { print }
+' CHANGELOG.md > "$notes"
+gh release create "v$version" --repo mongoid/mongoid-geospatial --verify-tag --title "$version" --notes-file "$notes" --latest
+rm "$notes"
+curl --fail --silent --show-error "https://rubygems.org/api/v2/rubygems/mongoid-geospatial/versions/$version.json"
+gh release view "v$version" --repo mongoid/mongoid-geospatial
 ```
-### 0.4.1 (Next)
 
-* Your contribution here.
-```
+Both RubyGems publication and a non-draft GitHub release must be verified before the release is complete.
 
-Increment the minor version, modify [lib/mongoid/geospatial/version.rb](lib/mongoid/geospatial/version.rb).
+## Prepare the Next Version
 
-Commit your changes.
-
-```
-git add CHANGELOG.md lib/mongoid/geospatial/version.rb
-git commit -m "Preparing for next developer iteration, 0.4.1."
-git push origin master
-```
+Increment the development patch version (for example, `7.4.2`) in `lib/mongoid/geospatial/version.rb`. Add `## 7.4.2 (Next)` and a contribution placeholder above the released changelog section. Commit and push these changes to `master` without changing the released tag.

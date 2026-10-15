@@ -3,6 +3,6 @@
 module Mongoid
   # Mongoid Geospatial version
   module Geospatial
-    VERSION = '7.4.0'
+    VERSION = '7.4.1'
   end
 end
