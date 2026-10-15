@@ -1,5 +1,6 @@
 ## 7.4.2 (Next)
 
+* [#57](https://github.com/mongoid/mongoid-geospatial/issues/57): Correct polygon and bounding-box query examples to use Mongoid symbol operators inside where - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 ## 7.4.1 (2026/10/14)

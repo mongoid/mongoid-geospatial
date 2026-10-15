@@ -330,17 +330,18 @@ The `geo_near` method returns an array of instantiated Mongoid documents, with t
 
 - within_polygon
 
+Use Mongoid's symbol operator inside `where`, not `Bar.within_polygon`. Polygon coordinates are an array of rings; close each ring by repeating its first point at the end.
+
 ```ruby
-Bar.within_polygon(location: [[[x,y],...[x,y]]])
-# or with a bbox
-Bar.within_polygon(location: street.bbox)
+ring = [[0, 0], [2, 0], [2, 2], [0, 2], [0, 0]]
+Bar.where(:location.within_polygon => [ring])
+# or with a bounding box (two opposite corners, not a polygon ring)
+Bar.where(:location.within_box => street.bbox)
 ```
 
 - within_circle / within_spherical_circle
 
-Mongoid ships `within_polygon` and `within_box` and stopped there; this gem
-registers the two circle shapes, which is what `radius` and `radius_sphere`
-have been building arguments for all along.
+Mongoid provides the `within_polygon` and `within_box` symbol operators; this gem registers the two circle operators for use with `radius` and `radius_sphere`.
 
 ```ruby
 Bar.where(:location.within_spherical_circle => cafe.location.radius_sphere(5, :km))
