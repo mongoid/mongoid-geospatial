@@ -82,6 +82,8 @@ _Note: the convention of having longitude as the first coordinate may vary for o
 
 We store data in the DB as a [x, y] array then reformat when it is returned to you
 
+An empty array already stored in a Point field is read as `nil`, matching assignment of an empty array. Reading it does not rewrite the database; you can replace it with valid coordinates or explicitly set the field to `nil` and save.
+
 ```ruby
 cafe = Place.create(
   name: 'Café Rider',
