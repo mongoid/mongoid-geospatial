@@ -1,3 +1,7 @@
+## 7.4.2 (Next)
+
+* Your contribution here.
+
 ## 7.4.1 (2026/10/14)
 
 * [#76](https://github.com/mongoid/mongoid-geospatial/pull/76): Fix: a geometry field stored as GeoJSON (`{ type, coordinates }`) raised `TypeError` on load (#46) - [@cschell](https://github.com/cschell).
