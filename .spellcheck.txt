@@ -27,6 +27,7 @@ customizable
 dblock
 de
 Defaultable
+demongoize
 distanceField
 distanceMultiplier
 emacs
