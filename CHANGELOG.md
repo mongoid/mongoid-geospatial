@@ -1,5 +1,6 @@
 ## 7.4.2 (Next)
 
+* [#79](https://github.com/mongoid/mongoid-geospatial/pull/79): Cover bounded spherical searches, coordinate errors, RGeo arrays and standalone version loading, reaching full line coverage - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
 ## 7.4.1 (2026/10/14)
