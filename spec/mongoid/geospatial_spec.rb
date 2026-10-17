@@ -87,6 +87,14 @@ describe Mongoid::Geospatial do
   end
 
   context '#nearby 2dsphere' do
+    it 'accepts explicit spherical mode and a maximum distance in its spatial scope' do
+      Alarm.create_indexes
+      nearby = Alarm.create!(name: 'nearby', spot: [0, 0])
+      Alarm.create!(name: 'far away', spot: [10, 10])
+
+      expect(Alarm.closest_to_spot([0, 0], spherical: true, max_distance: 1000).to_a).to eq([nearby])
+    end
+
     before do
       Alarm.create_indexes
     end
