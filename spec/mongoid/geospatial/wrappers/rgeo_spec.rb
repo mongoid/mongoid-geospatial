@@ -14,6 +14,13 @@ describe 'RGeo Wrapper' do
   end
 
   describe Mongoid::Geospatial::Point do
+    it 'preserves all RGeo coordinates in array conversion and indexed access' do
+      point = RGeo::Geographic.spherical_factory(has_z_coordinate: true).point(1, 2, 3)
+
+      expect(point.to_a).to eq([1.0, 2.0, 3.0])
+      expect(point[2]).to eq(3.0)
+    end
+
     it 'does not interfere with mongoid' do
       Bar.create!(name: "Moe's")
       expect(Bar.count).to eql(1)
