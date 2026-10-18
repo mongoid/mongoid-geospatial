@@ -168,6 +168,8 @@ module Mongoid
         # Database -> Object
         # Get it back
         def demongoize(obj)
+          return nil if obj == []
+
           obj && new(*obj)
         end
 
