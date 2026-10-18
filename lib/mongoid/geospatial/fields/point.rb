@@ -168,7 +168,8 @@ module Mongoid
         # Database -> Object
         # Get it back
         def demongoize(obj)
-          obj && new(*obj)
+          coordinates = obj.is_a?(Hash) ? obj['coordinates'] || obj[:coordinates] : obj
+          obj && new(*coordinates)
         end
 
         #
