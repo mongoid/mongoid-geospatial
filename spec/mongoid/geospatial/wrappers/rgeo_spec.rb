@@ -13,6 +13,43 @@ describe 'RGeo Wrapper' do
     Mongoid::Geospatial.with_georuby!
   end
 
+  describe 'configured factory' do
+    around do |example|
+      Mongoid::Geospatial.with_rgeo!
+      original = Mongoid::Geospatial.factory
+      Mongoid::Geospatial.factory = RGeo::Cartesian.simple_factory
+      example.run
+    ensure
+      Mongoid::Geospatial.factory = original
+    end
+
+    it 'uses the factory for points and their distances' do
+      point = Mongoid::Geospatial::Point.new(0, 0)
+      other = Mongoid::Geospatial::Point.new(3, 4)
+
+      expect(point.to_rgeo.factory).to equal(Mongoid::Geospatial.factory)
+      expect(point.rgeo_distance(other)).to eq(5)
+    end
+
+    it 'uses the same factory for line strings and their points' do
+      line = Mongoid::Geospatial::LineString.new([[0, 0], [3, 4]])
+
+      expect(line.points.map(&:factory)).to all(equal(Mongoid::Geospatial.factory))
+      expect(line.to_rgeo.factory).to equal(Mongoid::Geospatial.factory)
+      expect(line.to_rgeo.length).to eq(5)
+    end
+
+    it 'uses the same factory for polygons, rings and points' do
+      polygon = Mongoid::Geospatial::Polygon.new([[0, 0], [2, 0], [2, 2], [0, 2]])
+      geometry = polygon.to_rgeo
+
+      expect(polygon.points.map(&:factory)).to all(equal(Mongoid::Geospatial.factory))
+      expect(geometry.factory).to equal(Mongoid::Geospatial.factory)
+      expect(geometry.exterior_ring.factory).to equal(Mongoid::Geospatial.factory)
+      expect(geometry.exterior_ring.num_points).to eq(5)
+    end
+  end
+
   describe Mongoid::Geospatial::Point do
     it 'preserves all RGeo coordinates in array conversion and indexed access' do
       point = RGeo::Geographic.spherical_factory(has_z_coordinate: true).point(1, 2, 3)
