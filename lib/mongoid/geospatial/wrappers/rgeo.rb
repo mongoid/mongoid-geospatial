@@ -3,6 +3,8 @@
 require 'rgeo'
 require 'mongoid/geospatial/ext/rgeo_spherical_point_impl'
 
+Mongoid::Geospatial.factory ||= RGeo::Geographic.spherical_factory
+
 module Mongoid
   #
   # Wrappers for RGeo
@@ -16,7 +18,7 @@ module Mongoid
       #
       # @return (RGeo::SphericalFactory::Point)
       def to_rgeo
-        RGeo::Geographic.spherical_factory.point x, y
+        Mongoid::Geospatial.factory.point x, y
       end
 
       #
@@ -32,7 +34,7 @@ module Mongoid
     GeometryField.class_eval do
       def points
         map do |pair|
-          RGeo::Geographic.spherical_factory.point(*pair)
+          Mongoid::Geospatial.factory.point(*pair)
         end
       end
     end
@@ -40,15 +42,15 @@ module Mongoid
     # Wrapper to Rgeo's LineString
     LineString.class_eval do
       def to_rgeo
-        RGeo::Geographic.spherical_factory.line_string(points)
+        Mongoid::Geospatial.factory.line_string(points)
       end
     end
 
     # Wrapper to Rgeo's Polygon
     Polygon.class_eval do
       def to_rgeo
-        ring = RGeo::Geographic.spherical_factory.linear_ring(points)
-        RGeo::Geographic.spherical_factory.polygon(ring)
+        ring = Mongoid::Geospatial.factory.linear_ring(points)
+        Mongoid::Geospatial.factory.polygon(ring)
       end
     end
   end

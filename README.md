@@ -410,6 +410,8 @@ Mongoid::Geospatial.with_rgeo!
 # Mongoid::Geospatial.factory = RGeo::Geographic.spherical_factory
 ```
 
+The default is RGeo's spherical factory. Set `Mongoid::Geospatial.factory` before or after loading the wrapper to use a different factory, for example `RGeo::Cartesian.simple_factory` for planar coordinates. Points, line strings, polygon rings, and polygons all use the configured factory. Distances and other operations follow that factory's coordinate system and units; this does not change MongoDB storage or indexes.
+
 With GeoRuby
 
 ```ruby

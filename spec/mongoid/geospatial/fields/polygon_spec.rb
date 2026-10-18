@@ -64,11 +64,12 @@ describe Mongoid::Geospatial::Polygon do
         raise 'RGeo or RGeo::Feature::Polygon not loaded' unless defined?(RGeo::Feature::Polygon)
       end
 
-      after do
-        if Mongoid::Geospatial.const_defined?(:Wrappers) && Mongoid::Geospatial::Wrappers.const_defined?(:Rgeo) && Mongoid::Geospatial::Polygon.method_defined?(:to_rgeo)
-          Mongoid::Geospatial::Polygon.send(:remove_method, :to_rgeo)
-        end
-        Mongoid::Geospatial.factory = nil
+      around do |example|
+        Mongoid::Geospatial.with_rgeo!
+        original_factory = Mongoid::Geospatial.factory
+        example.run
+      ensure
+        Mongoid::Geospatial.factory = original_factory
       end
 
       let(:farm_with_area) { Farm.new(area: [[5, 5], [6, 5], [6, 6], [5, 6], [5, 5]]) } # Closed polygon
