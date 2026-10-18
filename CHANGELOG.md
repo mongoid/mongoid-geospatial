@@ -1,5 +1,6 @@
 ## 7.4.2 (Next)
 
+* [#73](https://github.com/mongoid/mongoid-geospatial/issues/73): Read persisted GeoJSON Point documents and cover spherical queries for both GeoJSON and coordinate-array storage - [@dblock](https://github.com/dblock).
 * [#79](https://github.com/mongoid/mongoid-geospatial/pull/79): Cover bounded spherical searches, coordinate errors and RGeo arrays - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
