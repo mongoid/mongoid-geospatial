@@ -1,5 +1,6 @@
 ## 7.4.2 (Next)
 
+* [#66](https://github.com/mongoid/mongoid-geospatial/issues/66): Honor the configured RGeo factory for all geometry conversions - [@dblock](https://github.com/dblock).
 * [#79](https://github.com/mongoid/mongoid-geospatial/pull/79): Cover bounded spherical searches, coordinate errors and RGeo arrays - [@dblock](https://github.com/dblock).
 * Your contribution here.
 
