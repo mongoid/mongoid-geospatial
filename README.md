@@ -118,6 +118,8 @@ cafe.location.to_geo   # => GeoRuby::Point
 cafe.location.to_rgeo  # => RGeo::Point
 ```
 
+Point fields also accept GeoJSON hashes such as `{ type: 'Point', coordinates: [lng, lat] }` (with symbol or string keys). Assignment retains the existing coordinate-array storage format; Point fields can also read GeoJSON Point documents already stored in MongoDB. Both representations work with a `2dsphere` index: `sphere: true` selects the index, not a different storage format.
+
 Conventions:
 
 This lib uses #x and #y everywhere. It's shorter than lat or lng or another variation that also confuses. A point is a 2D mathematical notation, longitude/latitude is when you use that notation to map an sphere. In other words: all longitudes are 'xs' where not all 'xs' are longitudes.
