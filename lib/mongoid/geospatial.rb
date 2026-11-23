@@ -390,7 +390,7 @@ module Mongoid
           mongoized_coords = { 'type' => 'Point', 'coordinates' => mongoized_coords }
         end
 
-        # Core $geoNear parameters derived from method arguments, these are not overrideable by user_options.
+        # Core $geoNear parameters derived from method arguments, these are not overridable by user_options.
         geo_near_core_params = {
           key: field_name.to_s,
           near: mongoized_coords

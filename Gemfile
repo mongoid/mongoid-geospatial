@@ -15,13 +15,19 @@ group :development, :test do
   gem 'georuby'
   gem 'guard'
   gem 'guard-rspec'
-  gem 'guard-rubocop'
   gem 'rake'
   gem 'reline'
   gem 'rgeo'
-  gem 'rubocop'
-  gem 'rubocop-rake'
   gem 'yard'
+  if RUBY_ENGINE == 'ruby' && Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.3')
+    gem 'guard-rubocop'
+    gem 'rubocop', '~> 1.92'
+    gem 'rubocop-md', '~> 3.0', require: false
+    gem 'rubocop-prose', '~> 0.2', require: false
+    gem 'rubocop-rake', '~> 0.7', require: false
+    gem 'rubocop-spellcheck', '~> 0.2', require: false
+    gem 'rubocop-yaml', '~> 0.1.0', require: false
+  end
 end
 
 group :test do

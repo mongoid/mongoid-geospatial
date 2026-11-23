@@ -2,9 +2,7 @@
 
 A Mongoid Extension that simplifies the use of MongoDB spatial features.
 
-[![Gem Version](https://badge.fury.io/rb/mongoid-geospatial.svg)](http://badge.fury.io/rb/mongoid-geospatial)
-[![Test](https://github.com/mongoid/mongoid-geospatial/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/mongoid/mongoid-geospatial/actions/workflows/test.yml?query=branch%3Amaster)
-[![Coverage Status](https://coveralls.io/repos/github/mongoid/mongoid-geospatial/badge.svg?branch=master)](https://coveralls.io/github/mongoid/mongoid-geospatial?branch=master)
+[![Gem Version](https://badge.fury.io/rb/mongoid-geospatial.svg)](https://badge.fury.io/rb/mongoid-geospatial) [![Test](https://github.com/mongoid/mongoid-geospatial/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/mongoid/mongoid-geospatial/actions/workflows/test.yml?query=branch%3Amaster) [![Coverage Status](https://coveralls.io/repos/github/mongoid/mongoid-geospatial/badge.svg?branch=master)](https://coveralls.io/github/mongoid/mongoid-geospatial?branch=master)
 
 The Ruby 4.0 CI job measures all library files with SimpleCov and submits `coverage/.resultset.json` through the official Coveralls action using GitHub's automatic token. Other matrix jobs do not upload duplicate reports. Run `COVERAGE=true bundle install` and `COVERAGE=true bundle exec rake spec` to measure coverage locally. An accepted upstream default-branch build is required for the badge; this workflow alone does not activate the external service.
 
@@ -36,32 +34,33 @@ class Place
 
   # To query on your points, don't forget to index:
   # You may use a method:
-  sphere_index :location  # 2dsphere
+  sphere_index :location # 2dsphere
   # or
   spatial_index :location # 2d
 
   # Or use a helper directly on the `field`:
-  field :location, type: Point, spatial: true  # 2d
+  field :location, type: Point, spatial: true # 2d
   # or
-  field :location, type: Point, sphere: true   # 2dsphere
+  field :location, type: Point, sphere: true # 2dsphere
 end
 ```
 
 A pin named `geom` on a 2dsphere index is one include:
 
 ```ruby
-include Mongoid::Geospatial::Geom   # field :geom, type: Point, sphere: true
+include Mongoid::Geospatial::Geom # field :geom, type: Point, sphere: true
+
 # or a named one:
 geom :pick_up
 ```
 
 Generate indexes on MongoDB via rake:
 
-```
+```sh
 rake db:mongoid:create_indexes
 ```
 
-Or programatically:
+Or programmatically:
 
 ```ruby
 Place.create_indexes
@@ -69,38 +68,35 @@ Place.create_indexes
 
 ## Points
 
-This gem defines a specific `Point` class under the Mongoid::Geospatial namespace. Make sure to use `type: ::Mongoid::Geospatial::Point` to avoid name errors or collisions with other `Point` classes you might already have defined `NameError`s.
+This gem defines a specific `Point` class under the Mongoid::Geospatial namespace. Make sure to use `type: ::Mongoid::Geospatial::Point` to avoid name errors or collisions with other `Point` classes you might already have defined `NameError` exceptions.
 
 Currently, MongoDB supports query operations on 2D points only, so that's what this lib does. All geometries apart from points are just arrays in the database. Here's is how you can input a point as:
 
 - longitude latitude array in that order - [long,lat] ([x, y])
 - an unordered hash with latitude key(:lat, :latitude) and a longitude key(:lon, :long, :lng, :longitude)
-- an ordered hash with longitude as the first item and latitude as the second item; this hash does not have include the latitude and longitude keys
-- anything with the a method #to_xy or #to_lng_lat that converts itself to [long, lat] array
+- an ordered hash with longitude as the first item and latitude as the second item; this hash does not need to include the latitude and longitude keys
+- anything with a method #to_xy or #to_lng_lat that converts itself to [long, lat] array
 
 _Note: the convention of having longitude as the first coordinate may vary for other libraries. For instance, Google Maps often refer to "LatLng". Make sure you keep those differences in mind. See below for how to configure this library for LatLng._
 
 We store data in the DB as a [x, y] array then reformat when it is returned to you
 
 ```ruby
-cafe = Place.create(
-  name: 'Café Rider',
-  location: {:lat => 44.106667, :lng => -73.935833},
-  # or
-  location: {latitude: 40.703056, longitude: -74.026667}
-  #...
+cafe = Place.create(name: 'Café Rider', location: { lat: 44.106667, lng: -73.935833 })
+# or
+cafe = Place.create(name: 'Café Rider', location: { latitude: 40.703056, longitude: -74.026667 })
 ```
 
 Now to access this spatial information we can do this
 
 ```ruby
-cafe.location  # => [-74.026667, 40.703056]
+cafe.location # => [-74.026667, 40.703056]
 ```
 
 If you need a hash
 
 ```ruby
-cafe.location.to_hsh   # => { x: -74.026667, y: 40.703056 }
+cafe.location.to_hsh # => { x: -74.026667, y: 40.703056 }
 ```
 
 Commonly used
@@ -122,9 +118,7 @@ cafe.location.to_rgeo  # => RGeo::Point
 
 Conventions:
 
-This lib uses #x and #y everywhere.
-It's shorter than lat or lng or another variation that also confuses.
-A point is a 2D mathematical notation, longitude/latitude is when you use that notation to map an sphere. In other words: all longitudes are 'xs' where not all 'xs' are longitudes.
+This lib uses #x and #y everywhere. It's shorter than lat or lng or another variation that also confuses. A point is a 2D mathematical notation, longitude/latitude is when you use that notation to map an sphere. In other words: all longitudes are 'xs' where not all 'xs' are longitudes.
 
 Distance is `Point#distance` (haversine, km). Projections and heavier geometry still go to RGeo or GeoRuby. Some built in helpers for mongoid queries:
 
@@ -160,11 +154,11 @@ class CrazyGeom
   field :route,     type: Line
   field :area,      type: Polygon
 
-  field :square,    type: Box
-  field :around,    type: Circle
+  field :square, type: Box
+  field :around, type: Circle
 
   # default mongodb options
-  spatial_index :location, {bit: 24, min: -180, max: 180}
+  spatial_index :location, { bit: 24, min: -180, max: 180 }
 
   # query by location
   spatial_scope :location
@@ -173,31 +167,29 @@ end
 
 ## Helpers
 
-You can use `spatial: true` to add a '2d' index automatically,
-No need for `spatial_index :location`:
+You can use `spatial: true` to add a '2d' index automatically, No need for `spatial_index :location`:
 
 ```ruby
-field :location,  type: Point, spatial: true
+field :location, type: Point, spatial: true
 ```
 
 And you can use `sphere: true` to add a '2dsphere' index automatically, no need for `spatial_sphere :location`:
 
 ```ruby
-field :location,  type: Point, sphere: true
+field :location, type: Point, sphere: true
 ```
 
 You can delegate some point methods to the instance itself:
 
 ```ruby
-field :location,  type: Point, delegate: true
+field :location, type: Point, delegate: true
 ```
 
 Now instead of `instance.location.x` you may call `instance.x`.
 
 ## Geometry
 
-You can also store Circle, Box, Line (LineString) and Polygons.
-Some helper methods are available to them:
+You can also store Circle, Box, Line (LineString) and Polygons. Some helper methods are available to them:
 
 ```ruby
 # Returns a geometry bounding box
@@ -219,21 +211,21 @@ polygon.radius_sphere(5) # [[1.0, 1.0], 0.00048..]
 
 You can use Geometry instance directly on any query:
 
-### near
+### Near
 
 ```ruby
 Bar.near(location: person.house)
 Bar.where(:location.near => person.house)
 ```
 
-### near_sphere
+### Near Sphere
 
 ```ruby
 Bar.near_sphere(location: person.house)
 Bar.where(:location.near_sphere => person.house)
 ```
 
-### nearby / within
+### Nearby / Within
 
 ```ruby
 Bar.nearby(person.house)
@@ -244,30 +236,20 @@ Ride.within(here, 5, field: :drop_up) # two pins? name the one you mean
 City.where(:geom.near_sphere => Mongoid::Geospatial.near_query(geom, 50))
 ```
 
-`within` caps by km, nearest first, chainable — on either index. `$nearSphere`
-speaks two dialects and **the field's index picks which**, so the km never moves:
+`within` caps by km, nearest first, chainable — on either index. `$nearSphere` speaks two dialects and **the field's index picks which**, so the km never moves:
 
-```
+```text
    sphere: true    { loc: { $nearSphere: { $geometry: {..}, $maxDistance: <metres> } } }
    spatial: true   { loc: { $nearSphere: [x, y],            $maxDistance: <radians> } }
                                                                           km / 6371
 ```
 
-Hand the server the wrong one and it answers `NoQueryExecutionPlans` — not a
-wrong count, a raise.
+Hand the server the wrong one and it answers `NoQueryExecutionPlans` — not a wrong count, a raise.
 
-**`within(..).first` is not the nearest one.** Mongoid's `#first` and `#last`
-sort by `_id` whenever the criteria carries no sort of its own, and that `_id`
-sort replaces the distance order `$near` put there. It reads as working every
-time the closest document happens to be the oldest. Walk the criteria
-(`.to_a.first`) or ask `nearest`. `Mongoid::Geospatial.near_selector(field, point, km,
-sphere: <bool>)` is the one place both shapes are built; `near_query` is the
-2dsphere half of it, for a query you write by hand.
+**`within(..).first` is not the nearest one.** Mongoid's `#first` and `#last` sort by `_id` whenever the criteria carries no sort of its own, and that `_id` sort replaces the distance order `$near` put there. It reads as working every time the closest document happens to be the oldest. Walk the criteria (`.to_a.first`) or ask `nearest`. `Mongoid::Geospatial.near_selector(field, point, km,
+sphere: <bool>)` is the one place both shapes are built; `near_query` is the 2dsphere half of it, for a query you write by hand.
 
-**Don't call `#first` or `#last` on a `$near` criteria.** Mongoid sorts by
-`_id` when a criteria carries no sort of its own, and that replaces the
-distance order Mongo put there. Walk the criteria instead — `.to_a.first` —
-or use `geo_near`, which returns the distance as a field you can sort on.
+**Don't call `#first` or `#last` on a `$near` criteria.** Mongoid sorts by `_id` when a criteria carries no sort of its own, and that replaces the distance order Mongo put there. Walk the criteria instead — `.to_a.first` — or use `geo_near`, which returns the distance as a field you can sort on.
 
 You can add a `spatial_scope` on your models. So you can query:
 
@@ -281,17 +263,15 @@ instead of
 Bar.near(location: my.location)
 ```
 
-Good when you're drunk. Just add to your model:
+Add it to your model:
 
 ```ruby
-spatial_scope :<field>
+spatial_scope :location
 ```
 
-### geo_near
+### Geo Near
 
-The `geo_near` class method provides a more powerful way to query for documents based on proximity,
-using MongoDB's `$geoNear` aggregation pipeline stage. This method allows for more complex
-options and returns the distance to each matched document.
+The `geo_near` class method provides a more powerful way to query for documents based on proximity, using MongoDB's `$geoNear` aggregation pipeline stage. This method allows for more complex options and returns the distance to each matched document.
 
 ```ruby
 # Find places near [10, 20], using spherical calculations, up to 5km away,
@@ -331,24 +311,21 @@ The `geo_near` method returns an array of instantiated Mongoid documents, with t
 - within_polygon
 
 ```ruby
-Bar.within_polygon(location: [[[x,y],...[x,y]]])
+Bar.within_polygon(location: [[[x, y], ...[x, y]]])
 # or with a bbox
 Bar.within_polygon(location: street.bbox)
 ```
 
 - within_circle / within_spherical_circle
 
-Mongoid ships `within_polygon` and `within_box` and stopped there; this gem
-registers the two circle shapes, which is what `radius` and `radius_sphere`
-have been building arguments for all along.
+Mongoid ships `within_polygon` and `within_box` and stopped there; this gem registers the two circle shapes, which is what `radius` and `radius_sphere` have been building arguments for all along.
 
 ```ruby
 Bar.where(:location.within_spherical_circle => cafe.location.radius_sphere(5, :km))
-Bar.where(:location.within_circle => cafe.location.radius(0.05))  # degrees, flat
+Bar.where(:location.within_circle => cafe.location.radius(0.05)) # degrees, flat
 ```
 
-`$centerSphere` reads radians (`radius_sphere` hands it those); `$center`
-reads the coordinate system's own units — degrees on a legacy pair.
+`$centerSphere` reads radians (`radius_sphere` hands it those); `$center` reads the coordinate system's own units — degrees on a legacy pair.
 
 - intersects_line
 - intersects_point
@@ -356,26 +333,19 @@ reads the coordinate system's own units — degrees on a legacy pair.
 
 ## External Libraries
 
-We currently support GeoRuby and RGeo.
-If you require one of those, a #to_geo and #to_rgeo, respectivelly,
-method(s) will be available to all spatial fields, returning the
-external library corresponding object.
+We currently support GeoRuby and RGeo. If you require one of those, a #to_geo and #to_rgeo, respectively, method(s) will be available to all spatial fields, returning the external library corresponding object.
 
 ### Use RGeo?
 
 <https://github.com/dazuma/rgeo>
 
-RGeo is a Ruby wrapper for Proj/GEOS.
-It's perfect when you need to work with complex calculations and projections.
-It'll require more stuff installed to compile/work.
+RGeo is a Ruby wrapper for Proj/GEOS. It's perfect when you need to work with complex calculations and projections. It'll require more stuff installed to compile/work.
 
 ### Use GeoRuby?
 
 <https://github.com/nofxx/georuby>
 
-GeoRuby is a pure Ruby Geometry Library.
-It's perfect if you want simple calculations and/or keep your stack in pure ruby.
-Albeit not full featured in maths it has a handful of methods and good import/export helpers.
+GeoRuby is a pure Ruby Geometry Library. It's perfect if you want simple calculations and/or keep your stack in pure ruby. Albeit not full featured in maths it has a handful of methods and good import/export helpers.
 
 ### Example
 
@@ -429,8 +399,7 @@ You will need to manually migrate any existing `Point` data if you change config
 
 ## This Fork
 
-This fork is not backwards compatible with 'mongoid_spacial'.
-This fork delegates calculations to external libs.
+This fork is not backwards compatible with 'mongoid_spacial'. This fork delegates calculations to external libs.
 
 Change in your models:
 
@@ -442,18 +411,19 @@ to
 
 ```ruby
 include Mongoid::Geospatial
+
 ```
 
 And for the fields:
 
 ```ruby
-field :source,  type: Array,    spacial: true
+field :source, type: Array, spacial: true
 ```
 
 to
 
 ```ruby
-field :source,  type: Point,    spatial: true # or sphere: true
+field :source, type: Point, spatial: true # or sphere: true
 ```
 
 Beware the 't' and 'c' issue. It's spaTial.
@@ -464,19 +434,19 @@ Beware the 't' and 'c' issue. It's spaTial.
 
 Indexes need to be created. Execute command:
 
-```
+```sh
 rake db:mongoid:create_indexes
 ```
 
 Programatically
 
-```
+```ruby
 Model.create_indexes
 ```
 
 ## Contributing
 
-See [CONTRIBUTING](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md), [CHANGELOG.md](CHANGELOG.md), and [RELEASING.md](RELEASING.md).
 
 ## License
 
