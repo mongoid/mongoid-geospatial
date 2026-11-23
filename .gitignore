@@ -50,3 +50,4 @@ pkg
 
 # For rubinius:
 #*.rbc
+/vendor/bundle

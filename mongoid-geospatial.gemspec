@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require File.expand_path('lib/mongoid/geospatial/version', __dir__)
+require_relative 'lib/mongoid/geospatial/version'
 
 Gem::Specification.new do |gem|
   gem.name          = 'mongoid-geospatial'
