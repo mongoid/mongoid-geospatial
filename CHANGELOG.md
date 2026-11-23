@@ -2,6 +2,7 @@
 
 * [#79](https://github.com/mongoid/mongoid-geospatial/pull/79): Cover bounded spherical searches, coordinate errors and RGeo arrays - [@dblock](https://github.com/dblock).
 * Your contribution here.
+* [#82](https://github.com/mongoid/mongoid-geospatial/pull/82): Lint Markdown, YAML, and spelling with rubocop-md, rubocop-prose, rubocop-spellcheck, and rubocop-yaml in a separate Lint workflow, and clean up documentation - [@dblock](https://github.com/dblock).
 
 ## 7.4.1 (2026/10/14)
 
@@ -25,7 +26,7 @@ has no 2dsphere index to answer with. The spec passed because it asserted the
 selector and never sent it, and because the model it asked carried both
 indexes by accident.
 
-```
+```text
    sphere: true    $nearSphere: { $geometry: {..}, $maxDistance: <metres> }   ok
    spatial: true   same                                    NoQueryExecutionPlans
                    $nearSphere: [x, y], $maxDistance: <km / 6371>            ok

@@ -1,13 +1,172 @@
-inherit_from: .rubocop_todo.yml
+plugins:
+- rubocop-md
+- rubocop-prose
+- rubocop-rake
+- rubocop-spellcheck
+- rubocop-yaml
+
+inherit_from: ".rubocop_todo.yml"
 
 AllCops:
   NewCops: enable
   TargetRubyVersion: 3.1
+  SuggestExtensions: false
+  inherit_mode:
+    merge:
+    - Include
+  Include:
+  - ".github/**/*.yml"
+  - ".rubocop.yml"
+  Exclude:
+  - coverage/**/*
+  - pkg/**/*
+  - vendor/**/*
 
-plugins:
-  - rubocop-rake
-# Overwrite or add rules to create your own house style
-#
-# # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
-# Layout/SpaceInsideArrayLiteralBrackets:
-#   Enabled: false
+YAML/Lint/InvalidSyntax:
+  Include:
+  - "**/*.yml"
+  - "**/*.yaml"
+
+YAML/Lint/DuplicateKey:
+  Include:
+  - "**/*.yml"
+  - "**/*.yaml"
+
+Naming/FileName:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - "**/*.md"
+  - ".github/workflows/*.yml"
+
+Metrics/MethodLength:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - "**/*.md"
+
+Metrics/AbcSize:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - "**/*.md"
+
+Naming/HeredocDelimiterNaming:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - "**/*.md"
+
+Style/SafeNavigation:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - "**/*.md"
+
+Style/OneClassPerFile:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - "**/*.md"
+
+Style/Documentation:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - "**/*.md"
+
+Lint/UselessAssignment:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - "**/*.md"
+
+Style/MultilineBlockChain:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - "**/*.md"
+
+Style/SymbolProc:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - "**/*.md"
+
+Lint/Void:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - "**/*.md"
+
+Metrics/BlockLength:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - Gemfile
+
+Layout/LineLength:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - ".github/workflows/*.yml"
+
+Markdown/HeadingCapitalization:
+  inherit_mode:
+    merge:
+    - Exclude
+  Enabled: true
+  Style: title_case
+  Exclude:
+  - CHANGELOG.md
+
+Prose/MaxLength:
+  inherit_mode:
+    merge:
+    - Exclude
+  Max: false
+  Exclude:
+  - CHANGELOG.md
+
+Spellcheck:
+  DictionaryFiles:
+    en:
+    - gem:rubocop-spellcheck/data/en/en.dic
+    - ".spellcheck.txt"
+
+Spellcheck/Spelling:
+  Exclude: []
+
+Markdown/CompactLists:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - CHANGELOG.md
+
+Markdown/FenceLanguage:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - CHANGELOG.md
+
+Style/MixinUsage:
+  inherit_mode:
+    merge:
+    - Exclude
+  Exclude:
+  - "**/*.md"
