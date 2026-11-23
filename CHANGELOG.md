@@ -1,9 +1,10 @@
-## 7.4.2 (Next)
+## 7.4.3 (Next)
 
 * [#79](https://github.com/mongoid/mongoid-geospatial/pull/79): Cover bounded spherical searches, coordinate errors and RGeo arrays - [@dblock](https://github.com/dblock).
 * Your contribution here.
 * [#82](https://github.com/mongoid/mongoid-geospatial/pull/82): Lint Markdown, YAML, and spelling with rubocop-md, rubocop-prose, rubocop-spellcheck, and rubocop-yaml in a separate Lint workflow, and clean up documentation - [@dblock](https://github.com/dblock).
 * [#83](https://github.com/mongoid/mongoid-geospatial/pull/83): Run CI pushes only on the default branch, cancel superseded pull request runs, skip duplicate lint in the test matrix, and bound job times - [@dblock](https://github.com/dblock).
+* [#84](https://github.com/mongoid/mongoid-geospatial/pull/84): Release with ruby-gem-release from a manually dispatched GitHub Actions workflow using RubyGems Trusted Publishing, with dry runs - [@dblock](https://github.com/dblock).
 
 ## 7.4.1 (2026/10/14)
 
