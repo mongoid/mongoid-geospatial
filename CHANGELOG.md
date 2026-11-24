@@ -1,3 +1,7 @@
+## 7.5.1 (Next)
+
+* Your contribution here.
+
 ## 7.5.0 (2026/11/24)
 
 * [#66](https://github.com/mongoid/mongoid-geospatial/issues/66): Honor the configured RGeo factory for all geometry conversions - [@dblock](https://github.com/dblock).
